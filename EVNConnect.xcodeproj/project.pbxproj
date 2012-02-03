@@ -285,6 +285,7 @@
 		79F7491514DB8D0F00C7BAD8 /* OATokenManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OATokenManager.h; sourceTree = "<group>"; };
 		79F7491614DB8D0F00C7BAD8 /* OATokenManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OATokenManager.m; sourceTree = "<group>"; };
 		79F7491714DB8D0F00C7BAD8 /* OAuthConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthConsumer.h; sourceTree = "<group>"; };
+		79F7492D14DB8F0700C7BAD8 /* APIKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APIKey.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -315,7 +316,6 @@
 		79F7475F14DA74A500C7BAD8 = {
 			isa = PBXGroup;
 			children = (
-				79F748B514DAB89700C7BAD8 /* Security.framework */,
 				79F747A114DA766D00C7BAD8 /* Libraries */,
 				79F7477414DA74A500C7BAD8 /* EVNConnect */,
 				79F7478C14DA74A500C7BAD8 /* EVNConnectTests */,
@@ -340,6 +340,7 @@
 				79F7476E14DA74A500C7BAD8 /* UIKit.framework */,
 				79F7477014DA74A500C7BAD8 /* Foundation.framework */,
 				79F7477214DA74A500C7BAD8 /* CoreGraphics.framework */,
+				79F748B514DAB89700C7BAD8 /* Security.framework */,
 				79F7478614DA74A500C7BAD8 /* SenTestingKit.framework */,
 			);
 			name = Frameworks;
@@ -354,6 +355,7 @@
 				79F7477E14DA74A500C7BAD8 /* AppDelegate.m */,
 				79F7484B14DAA01700C7BAD8 /* MainViewController.h */,
 				79F7484C14DAA01700C7BAD8 /* MainViewController.m */,
+				79F7492D14DB8F0700C7BAD8 /* APIKey.h */,
 			);
 			path = EVNConnect;
 			sourceTree = "<group>";

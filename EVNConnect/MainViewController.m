@@ -7,11 +7,7 @@
 //
 
 #import "MainViewController.h"
-
-#define EVERNOTE_CONSUMER_KEY @"kent013-5308"
-#define EVERNOTE_CONSUMER_SECRET @"77136cd9437a95c2"
-//#define EVERNOTE_CONSUMER_KEY @"kent013"
-//#define EVERNOTE_CONSUMER_SECRET @"3b96149c0e89f612"
+#import "APIKey.h"
 
 @implementation MainViewController
 @synthesize evernote = evernote_;
