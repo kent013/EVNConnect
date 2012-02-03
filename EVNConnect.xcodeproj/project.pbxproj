@@ -71,6 +71,7 @@
 		79F7492914DB8D0F00C7BAD8 /* OATestServer.rb in Resources */ = {isa = PBXBuildFile; fileRef = 79F7491214DB8D0F00C7BAD8 /* OATestServer.rb */; };
 		79F7492A14DB8D0F00C7BAD8 /* OAToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F7491414DB8D0F00C7BAD8 /* OAToken.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		79F7492B14DB8D0F00C7BAD8 /* OATokenManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F7491614DB8D0F00C7BAD8 /* OATokenManager.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		79F7493014DB916500C7BAD8 /* EvernoteAuthOAuthConsumer.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F7492F14DB916400C7BAD8 /* EvernoteAuthOAuthConsumer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -286,6 +287,9 @@
 		79F7491614DB8D0F00C7BAD8 /* OATokenManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OATokenManager.m; sourceTree = "<group>"; };
 		79F7491714DB8D0F00C7BAD8 /* OAuthConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OAuthConsumer.h; sourceTree = "<group>"; };
 		79F7492D14DB8F0700C7BAD8 /* APIKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = APIKey.h; sourceTree = "<group>"; };
+		79F7492E14DB916300C7BAD8 /* EvernoteAuthOAuthConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteAuthOAuthConsumer.h; sourceTree = "<group>"; };
+		79F7492F14DB916400C7BAD8 /* EvernoteAuthOAuthConsumer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteAuthOAuthConsumer.m; sourceTree = "<group>"; };
+		79F7493114DB917B00C7BAD8 /* EvernoteProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteProtocol.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -525,10 +529,13 @@
 			isa = PBXGroup;
 			children = (
 				79F748B014DAAD3500C7BAD8 /* EVNConnect.h */,
+				79F7493114DB917B00C7BAD8 /* EvernoteProtocol.h */,
 				79F748A814DAAD3500C7BAD8 /* Evernote.h */,
 				79F748A914DAAD3500C7BAD8 /* Evernote.m */,
 				79F748AE14DAAD3500C7BAD8 /* EvernoteRequest.h */,
 				79F748AF14DAAD3500C7BAD8 /* EvernoteRequest.m */,
+				79F7492E14DB916300C7BAD8 /* EvernoteAuthOAuthConsumer.h */,
+				79F7492F14DB916400C7BAD8 /* EvernoteAuthOAuthConsumer.m */,
 			);
 			path = EVNConnect;
 			sourceTree = "<group>";
@@ -843,6 +850,7 @@
 				79F7492814DB8D0F00C7BAD8 /* OAServiceTicket.m in Sources */,
 				79F7492A14DB8D0F00C7BAD8 /* OAToken.m in Sources */,
 				79F7492B14DB8D0F00C7BAD8 /* OATokenManager.m in Sources */,
+				79F7493014DB916500C7BAD8 /* EvernoteAuthOAuthConsumer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

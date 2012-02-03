@@ -20,8 +20,13 @@
         [loginButton setFrame:CGRectMake(self.view.frame.size.width / 2 - 40, self.view.frame.size.height / 2 - 15, 80, 30)];
         [loginButton addTarget:self action:@selector(handleLoginButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:loginButton];
-        evernote_ = [[Evernote alloc] initWithConsumerKey:EVERNOTE_CONSUMER_KEY andConsumerSecret:EVERNOTE_CONSUMER_SECRET andCallBackScheme:@"evnconnecttest://authorize" andDelegate:self];
-        evernote_.useSandbox = YES;
+        evernote_ = 
+        [[Evernote alloc] initWithAuthType:EvernoteAuthTypeOAuthConsumer
+                               consumerKey:EVERNOTE_CONSUMER_KEY 
+                            consumerSecret:EVERNOTE_CONSUMER_SECRET
+                            callbackScheme:@"evnconnecttest://authorize" 
+                                useSandBox:YES 
+                               andDelegate:self];
     }
     return self;
 }
