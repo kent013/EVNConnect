@@ -19,7 +19,6 @@
 
 #import "TNSStreamTransport.h"
 #import "TTransportException.h"
-#import "TObjective-C.h"
 
 
 @implementation TNSStreamTransport
@@ -27,9 +26,9 @@
 - (id) initWithInputStream: (NSInputStream *) input
               outputStream: (NSOutputStream *) output
 {
-  self = [super init];
-  mInput = [input retain_stub];
-  mOutput = [output retain_stub];
+  [super init];
+  mInput = [input retain];
+  mOutput = [output retain];
   return self;
 }
 
@@ -45,9 +44,9 @@
 
 - (void) dealloc
 {
-  [mInput release_stub];
-  [mOutput release_stub];
-  [super dealloc_stub];
+  [mInput release];
+  [mOutput release];
+  [super dealloc];
 }
 
 
@@ -66,7 +65,7 @@
 }
 
 
-- (void) write: (const uint8_t *) data offset: (unsigned int) offset length: (unsigned int) length
+- (void) write: (uint8_t *) data offset: (unsigned int) offset length: (unsigned int) length
 {
   int got = 0;
   int result = 0;

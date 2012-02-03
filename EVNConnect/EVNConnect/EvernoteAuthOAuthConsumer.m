@@ -3,44 +3,32 @@
 //  EVNConnect
 //
 //  Created by Kentaro ISHITOYA on 12/02/03.
-//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Kentaro ISHITOYA. All rights reserved.
 //
 
 #import "EvernoteAuthOAuthConsumer.h"
 #import "OAPlaintextSignatureProvider.h"
+#import "NSString+URLEncoding.h"
 //-----------------------------------------------------------------------------
 //Private Implementations
 //-----------------------------------------------------------------------------
 @interface EvernoteAuthOAuthConsumer(PrivateImplementation)
-- (NSURL *) requestTokenURL;
-- (NSURL *) authenticationURL;
 - (void) requestTokenTicket:(OAServiceTicket *)ticket didFinishGetRequestToken:(NSData *)data;
 - (void) requestTokenTicket:(OAServiceTicket *)ticket didFailWithError:(NSError *)error;
-- (void) requestTokenTicket:(OAServiceTicket *)ticket didFinishFetchAccessToken:(NSData *)data;- (void)evernoteDidLogin;
-- (void)evernoteDidNotLogin;
+- (void) requestTokenTicket:(OAServiceTicket *)ticket didFinishFetchAccessToken:(NSData *)data;
 @end
 
 @implementation EvernoteAuthOAuthConsumer(PrivateImplementation)
+/*!
+ * create authentication URL
+ */
 - (NSURL *) authenticationURL{
-    NSString *baseurl = kEvernoteOAuthAuthenticationURL;
-    if(useSandBox_){
-        baseurl = kEvernoteOAuthSandboxAuthenticationURL;
-    }
+    NSURL *url = [super authenticationURL];
     NSString *address = [NSString stringWithFormat:
                          @"%@?oauth_token=%@&format=mobile",
-                         baseurl,
+                         url.absoluteString,
                          accessToken_.key];
-    NSLog(@"auth: %@", baseurl);
-    return [NSURL URLWithString:address];    
-}
-
-- (NSURL *)requestTokenURL{
-    NSString *baseurl = kEvernoteOAuthRequestURL;
-    if(useSandBox_){
-        baseurl = kEvernoteOAuthSandboxRequestURL;
-    }
-    NSLog(@"token: %@", baseurl);
-    return [NSURL URLWithString:baseurl];    
+    return [NSURL URLWithString:address];
 }
 
 /*!
@@ -60,7 +48,11 @@
 	}
 }
 
+/*!
+ * failed to obtain request token
+ */
 - (void) requestTokenTicket:(OAServiceTicket *)ticket didFailWithError:(NSError *)error {
+    NSLog(@"%s,%@", __PRETTY_FUNCTION__, ticket.body);
     [self evernoteDidNotLogin];
 }
 
@@ -73,24 +65,27 @@
         [[NSString alloc] initWithData:data 
                               encoding:NSUTF8StringEncoding];
 		
-        accessToken_ = [self.accessToken initWithHTTPResponseBody:responseBody];
+        accessToken_ = [accessToken_ initWithHTTPResponseBody:responseBody];
+        
+        NSArray *pairs = [responseBody componentsSeparatedByString:@"&"];
+        for (NSString *pair in pairs) {
+            NSArray *elements = [pair componentsSeparatedByString:@"="];
+            NSString *key = [elements objectAtIndex:0];
+            NSString *value = [[elements objectAtIndex:1] decodedURLString];
+            if([key isEqualToString:@"edam_shard"]){
+                shardId_ = value;
+            }else if([key isEqualToString:@"edam_userId"]){
+                userId_ = value;
+            }else if([key isEqualToString:@"oauth_token"]){
+                authToken_ = value;
+            }
+        }
+        NSLog(@"%@", responseBody);
         [self evernoteDidLogin];
     } else {
         NSLog(@"%s,%@", __PRETTY_FUNCTION__, ticket.body);
         [self evernoteDidNotLogin];
 	}
-}
-
-- (void)evernoteDidLogin{
-    if ([delegate_ respondsToSelector:@selector(evernoteDidLogin)]) {
-        [delegate_ evernoteDidLogin];
-    }
-    
-}
-- (void)evernoteDidNotLogin{
-    if ([delegate_ respondsToSelector:@selector(evernoteDidNotLogin:)]) {
-        [delegate_ evernoteDidNotLogin];
-    }
 }
 @end
 
@@ -98,16 +93,12 @@
 //Public Implementations
 //----------------------------------------------------------------------------
 @implementation EvernoteAuthOAuthConsumer
-@synthesize accessToken = accessToken_;
-
+/*!
+ * initialize
+ */
 - (id)initWithConsumerKey:(NSString *)consumerKey consumerSecret:(NSString *)consumerSecret callbackScheme:(NSString *)callbackScheme useSandBox:(BOOL)useSandBox andDelegate:(id<EvernoteAuthDelegate>)delegate{
-    self = [super init];
+    self = [super initWithConsumerKey:consumerKey consumerSecret:consumerSecret callbackScheme:callbackScheme useSandBox:useSandBox andDelegate:delegate];
     if (self) {
-        consumerKey_ = consumerKey;
-        consumerSecret_ = consumerSecret;
-        callbackScheme_ = callbackScheme;
-        delegate_ = delegate;
-        useSandBox_ = useSandBox;
     }
     return self;
 }
@@ -116,6 +107,10 @@
  * login to evernote, obtain request token
  */
 -(void)login {
+    if([self isSessionValid]){
+        [self evernoteDidLogin];
+        return;
+    }
 	consumer_ = [[OAConsumer alloc] initWithKey:consumerKey_
                                          secret:consumerSecret_];
 	OADataFetcher *fetcher = [[OADataFetcher alloc] init];
@@ -142,8 +137,15 @@
  * user login finished
  */
 - (BOOL) handleOpenURL:(NSURL *)url {
-    NSLog(@"url:%@", url);
-	accessToken_ = [accessToken_ initWithHTTPResponseBody:[url query]];
+	accessToken_ = [accessToken_ initWithHTTPResponseBody:url.query];
+    
+    NSArray *pairs = [url.query componentsSeparatedByString:@"&"];
+    for (NSString *pair in pairs) {
+        NSArray *elements = [pair componentsSeparatedByString:@"="];
+        if ([[elements objectAtIndex:0] isEqualToString:@"oauth_verifier"]) {
+            accessToken_.verifier = [elements objectAtIndex:1];
+        }
+    }
     
 	OADataFetcher *fetcher = [[OADataFetcher alloc] init];
 	
@@ -163,15 +165,41 @@
     return YES;
 }
 
+/*!
+ * logout
+ */
 - (void)logout {
+    [self clearCredential];
     if ([delegate_ respondsToSelector:@selector(evernoteDidLogout)]) {
         [delegate_ evernoteDidLogout];
     }
 }
 
+/*!
+ * check is session valid
+ */
 - (BOOL)isSessionValid {
-    return self.accessToken != nil;
-    
+    return (authToken_ != nil);
 }
 
+/*!
+ * get auth token
+ */
+- (NSString *)authToken{
+    return authToken_;
+}
+
+/*!
+ * get user id
+ */
+- (NSString *)userId{
+    return userId_;
+}
+
+/*!
+ * get shard id
+ */
+-(NSString *)shardId{
+    return shardId_;
+}
 @end

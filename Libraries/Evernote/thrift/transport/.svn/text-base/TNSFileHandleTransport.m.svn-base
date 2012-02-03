@@ -20,7 +20,6 @@
 
 #import "TNSFileHandleTransport.h"
 #import "TTransportException.h"
-#import "TObjective-C.h"
 
 
 @implementation TNSFileHandleTransport
@@ -37,17 +36,17 @@
 {
   self = [super init];
 
-  mInputFileHandle = [inputFileHandle retain_stub];
-  mOutputFileHandle = [outputFileHandle retain_stub];
+  mInputFileHandle = [inputFileHandle retain];
+  mOutputFileHandle = [outputFileHandle retain];
 
   return self;
 }
 
 
 - (void) dealloc {
-  [mInputFileHandle release_stub];
-  [mOutputFileHandle release_stub];
-  [super dealloc_stub];
+  [mInputFileHandle release];
+  [mOutputFileHandle release];
+  [super dealloc];
 }
 
 
@@ -67,10 +66,9 @@
 }
 
 
-- (void) write: (const uint8_t *) data offset: (unsigned int) offset length: (unsigned int) length
+- (void) write: (uint8_t *) data offset: (unsigned int) offset length: (unsigned int) length
 {
-  void *pos = (void *) data + offset;
-  NSData * dataObject = [[NSData alloc] initWithBytesNoCopy: pos // data+offset
+  NSData * dataObject = [[NSData alloc] initWithBytesNoCopy: data+offset
                                                      length: length
                                                freeWhenDone: NO];
 
@@ -81,7 +79,7 @@
                                            reason: [NSString stringWithFormat: @"%s: Unable to write data: %@", __PRETTY_FUNCTION__, e]];
   }
 
-  [dataObject release_stub];
+  [dataObject release];
 }
 
 

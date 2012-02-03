@@ -17,9 +17,22 @@
     if(self){
         UIButton *loginButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
         [loginButton setTitle:@"Login" forState:UIControlStateNormal];
-        [loginButton setFrame:CGRectMake(self.view.frame.size.width / 2 - 40, self.view.frame.size.height / 2 - 15, 80, 30)];
+        [loginButton setFrame:CGRectMake(self.view.frame.size.width / 2 - 40, self.view.frame.size.height / 2 - 70, 80, 30)];
         [loginButton addTarget:self action:@selector(handleLoginButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
         [self.view addSubview:loginButton];
+        
+        UIButton *logoutButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [logoutButton setTitle:@"Logout" forState:UIControlStateNormal];
+        [logoutButton setFrame:CGRectMake(self.view.frame.size.width / 2 - 40, self.view.frame.size.height / 2 - 35, 80, 30)];
+        [logoutButton addTarget:self action:@selector(handleLogoutButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:logoutButton];
+        
+        UIButton *testButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [testButton setTitle:@"Test" forState:UIControlStateNormal];
+        [testButton setFrame:CGRectMake(self.view.frame.size.width / 2 - 40, self.view.frame.size.height / 2 + 5, 80, 30)];
+        [testButton addTarget:self action:@selector(handleTestButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:testButton];
+        
         evernote_ = 
         [[Evernote alloc] initWithAuthType:EvernoteAuthTypeOAuthConsumer
                                consumerKey:EVERNOTE_CONSUMER_KEY 
@@ -27,16 +40,25 @@
                             callbackScheme:@"evnconnecttest://authorize" 
                                 useSandBox:YES 
                                andDelegate:self];
+        [evernote_ loadCredential];
     }
     return self;
 }
-         
+
 - (void) handleLoginButtonTapped:(UIButton *)sender{
     [evernote_ login];
 }
 
+- (void) handleTestButtonTapped:(UIButton *)sender{
+    NSLog(@"%@", [evernote_ notebooks].description);
+}
+
+- (void) handleLogoutButtonTapped:(UIButton *)sender{
+    [evernote_ logout];
+}
+
 -(void)evernoteDidLogin{
-    
+    [evernote_ saveCredential];
 }
 
 - (void)evernoteDidLogout{
