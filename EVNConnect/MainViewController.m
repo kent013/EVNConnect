@@ -55,7 +55,16 @@
     if(notebook == nil){
         notebook = [evernote_ createNotebookWithTitle:@"test3"];
     }
-    [evernote_ createNoteInNotebook:notebook title:@"testnote" andContent:@"testnotemogemoge"];
+    
+    UIImage *image = [UIImage imageNamed:@"sample1.jpg"];
+    EDAMResource *resource = [evernote_ createResourceFromUIImage:image];
+    EDAMNote *note = 
+    [evernote_ createNoteInNotebook:notebook 
+                              title:@"testnote" 
+                            content:@"testnotemogemoge" 
+                               tags:[NSArray arrayWithObjects:@"Photo", @"Bear", nil]
+                       andResources:[NSArray arrayWithObject:resource]];
+    
     //NSLog(@"%@", [evernote_ findNotebooksWithPattern:@"test.*"].description);
 }
 

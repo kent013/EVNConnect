@@ -13,6 +13,8 @@
 #import "TBinaryProtocol.h"
 #import "PDKeychainBindings.h"
 #import "RegexKitLite.h"
+#import "UIImage+Digest.h"
+#import "NSData+Digest.h"
 
 //-----------------------------------------------------------------------------
 //Private Implementations
@@ -164,7 +166,76 @@
     [keychain removeObjectForKey:kEvernoteShardId];
     [authConsumer_ clearCredential];
 }
-#pragma mark - Fetch note and notebook
+
+#pragma mark - tags
+/*!
+ * list tags
+ */
+- (NSArray *)tags{
+	if (self.noteStoreClient == nil) {
+        return nil;
+    }
+    @try {
+        NSArray *tags = [self.noteStoreClient listTags:authConsumer_.authToken];
+        return [NSArray arrayWithArray:tags];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
+	return nil;
+}
+
+/*!
+ * get tag for title
+ */
+- (EDAMNotebook *)tagNamed:(NSString *)name{
+    NSString *pattern = [NSString stringWithFormat:@"^%@$", name];
+    NSArray *tags = [self findTagsWithPattern:pattern];
+    if(tags.count == 0){
+        return nil;
+    }
+    return [tags objectAtIndex:0];
+}
+
+/*!
+ * note book with pattern
+ */
+- (NSArray *)findTagsWithPattern:(NSString *)pattern{
+    NSArray *tags = [self tags];
+    NSMutableArray *foundTags = [[NSMutableArray alloc] init];
+    for(EDAMNotebook *tag in tags){
+        if(tag.nameIsSet && [tag.name isMatchedByRegex:pattern]){
+            [foundTags addObject:tag];
+        }
+    }
+    return foundTags;
+}
+
+
+
+/*!
+ * create tag
+ * when a same title tag is already exist, it throws exception.
+ * so you might have check before creating it.
+ */
+- (EDAMTag*)createTagWithName:(NSString *)name{
+	if (self.noteStoreClient == nil) {
+        return nil;
+    }
+    @try {
+        EDAMTag *tag = [[EDAMTag alloc] init];
+        tag.name = name;
+        return [self.noteStoreClient createTag: authConsumer_.authToken :tag];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
+	return nil;
+}
+
+#pragma mark - tags
 /*!
  * list all notebooks
  */
@@ -247,6 +318,31 @@
 	return nil;
 }
 
+#pragma mark - resource
+/*!
+ * create resource
+ */
+- (EDAMResource *) createResourceFromUIImage:(UIImage *)image{
+    NSData * imageNSData = UIImageJPEGRepresentation(image, 1.0);
+    return [self createResourceFromImageData:imageNSData andMime:@"image/jpeg"];
+}
+
+/*!
+ * create resource from NSData
+ */
+- (EDAMResource *)createResourceFromImageData:(NSData *)imageNSData andMime:(NSString *)mime{
+    NSString * hash = imageNSData.MD5DigestString;
+    EDAMResource * imageResource = nil;
+    
+    EDAMData * imageData = [[EDAMData alloc] initWithBodyHash:[hash dataUsingEncoding: NSASCIIStringEncoding] size:[imageNSData length] body:imageNSData];
+    EDAMResourceAttributes * imageAttributes = [[EDAMResourceAttributes alloc] init];    
+    imageResource  = [[EDAMResource alloc]init];
+    [imageResource setMime:mime];
+    [imageResource setData:imageData];
+    [imageResource setAttributes:imageAttributes];
+    return imageResource;    
+}
+
 #pragma mark - notes
 /*!
  * get notes in notebook
@@ -288,14 +384,26 @@
 /*!
  * create note in notebook
  */
-- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title andContent:(NSString *)content{
-	return [self createNoteInNotebook:notebook title:title content:content andResources:nil];
+- (EDAMNote *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title andContent:(NSString *)content{
+        return [self createNoteInNotebook:notebook title:title content:content tags:nil andResources:nil];
+}
+
+/*!
+ * create note in notebook with tags
+ */
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content andTags:(NSArray *)tags{
+	return [self createNoteInNotebook:notebook title:title content:content tags:tags andResources:nil];
 }
 
 /*!
  * create note in notebook with resource
+ * @param target notebook
+ * @param title of note
+ * @param content of note
+ * @param array of tag, can be EDAMTag or NSString
+ * @param array of resource, each item must be instance of EDAMResource.
  */
-- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content andResources:(NSArray *)resources{
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content tags:(NSArray *)tags andResources:(NSArray *)resources{
 	if (self.noteStoreClient == nil) {
         return nil;
     }
@@ -303,16 +411,31 @@
         EDAMNote *newNote = [[EDAMNote alloc] init];
         [newNote setNotebookGuid:notebook.guid];
         [newNote setTitle:title];
+        for(id tag in tags){
+            if([tag isKindOfClass:[EDAMTag class]]){
+                [newNote.tagGuids addObject:tag];
+            }else if([tag isKindOfClass:[NSString class]]){
+                [newNote.tagNames addObject:tag];
+            }
+        }
         
+        for(id resource in resources){
+            if([resource isKindOfClass:[EDAMResource class]] == NO){
+                @throw [NSException exceptionWithName: @"IllegalArgument"
+                                               reason: @"resource must be EDAMResource"
+                                             userInfo: nil];
+            }
+        }
         
         if([content isMatchedByRegex:@"^<?xml"] == NO){
             content = [NSString stringWithFormat: @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n<en-note>%@", content];
             for(EDAMResource *resource in resources){
-                NSString * imageENML = [NSString stringWithFormat:@"<en-media type=\"%@\" hash=\"%@\"/>", resource.mime, resource.data.hash];
-                content = [NSString stringWithFormat:@"%@%@", content, imageENML];
+                NSString * resourceENML = [NSString stringWithFormat:@"<en-media type=\"%@\" hash=\"%@\"/>", resource.mime, [[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]];
+                content = [NSString stringWithFormat:@"%@%@", content, resourceENML];
             }
             content = [NSString stringWithFormat:@"%@%@", content, @"</en-note>"];
         }
+        NSLog(@"%@", content);
         
         [newNote setContent:content];
         [newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];

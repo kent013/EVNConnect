@@ -24,6 +24,7 @@
 }
 @property(nonatomic, weak) id<EvernoteSessionDelegate> sessionDelegate;
 
+#pragma - authentication
 - (id)initWithAuthType:(EvernoteAuthType) authType
            consumerKey:(NSString*)consumerKey
         consumerSecret:(NSString*)consumerSecret
@@ -39,8 +40,18 @@
 - (void)loadCredential;
 - (void)clearCredential;
 
+#pragma mark - resource
+- (EDAMResource *) createResourceFromUIImage:(UIImage *)image;
+- (EDAMResource *) createResourceFromImageData:(NSData *)image andMime:(NSString *)mime;
+
+#pragma mark - tags
+- (NSArray *)tags;
+- (EDAMTag *)tagNamed: (NSString *)name;
+- (NSArray *)findTagsWithPattern: (NSString *)pattern;
+- (EDAMTag *)createTagWithName: (NSString *)tag;
+
 #pragma mark - notebooks
-- (NSArray*)notebooks;
+- (NSArray *)notebooks;
 - (EDAMNotebook*)notebookNamed:(NSString *)title;
 - (NSArray *)findNotebooksWithPattern:(NSString *)pattern;
 - (EDAMNotebook*)defaultNotebook;
@@ -50,7 +61,8 @@
 - (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid;
 - (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid;
 - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title andContent:(NSString*)content;
-- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content andResources:(NSArray*)resources;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content andTags:(NSArray*)tags;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
 - (void)removeNoteForGUID:(EDAMGuid)guid;
 @end
 
