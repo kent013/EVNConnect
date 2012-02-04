@@ -28,6 +28,12 @@
 		7940B25914DD0B29004DC895 /* NSData+Digest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B25614DD0B29004DC895 /* NSData+Digest.m */; };
 		7940B25A14DD0B29004DC895 /* UIImage+Digest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B25814DD0B29004DC895 /* UIImage+Digest.m */; };
 		7940B25E14DD0D37004DC895 /* sample1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7940B25D14DD0D37004DC895 /* sample1.jpg */; };
+		7940B2CA14DD17A8004DC895 /* DDXMLElementAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2BD14DD17A8004DC895 /* DDXMLElementAdditions.m */; };
+		7940B2CB14DD17A8004DC895 /* NSString+DDXML.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C014DD17A8004DC895 /* NSString+DDXML.m */; };
+		7940B2CC14DD17A8004DC895 /* DDXMLDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C314DD17A8004DC895 /* DDXMLDocument.m */; };
+		7940B2CD14DD17A8004DC895 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C514DD17A8004DC895 /* DDXMLElement.m */; };
+		7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C714DD17A8004DC895 /* DDXMLNode.m */; };
+		7940B2D014DD1836004DC895 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7940B2CF14DD1835004DC895 /* libxml2.dylib */; };
 		79F7476F14DA74A500C7BAD8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7476E14DA74A500C7BAD8 /* UIKit.framework */; };
 		79F7477114DA74A500C7BAD8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477014DA74A500C7BAD8 /* Foundation.framework */; };
 		79F7477314DA74A500C7BAD8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477214DA74A500C7BAD8 /* CoreGraphics.framework */; };
@@ -135,6 +141,19 @@
 		7940B25714DD0B29004DC895 /* UIImage+Digest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Digest.h"; sourceTree = "<group>"; };
 		7940B25814DD0B29004DC895 /* UIImage+Digest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Digest.m"; sourceTree = "<group>"; };
 		7940B25D14DD0D37004DC895 /* sample1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sample1.jpg; sourceTree = "<group>"; };
+		7940B2BC14DD17A8004DC895 /* DDXMLElementAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLElementAdditions.h; sourceTree = "<group>"; };
+		7940B2BD14DD17A8004DC895 /* DDXMLElementAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLElementAdditions.m; sourceTree = "<group>"; };
+		7940B2BF14DD17A8004DC895 /* NSString+DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DDXML.h"; sourceTree = "<group>"; };
+		7940B2C014DD17A8004DC895 /* NSString+DDXML.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DDXML.m"; sourceTree = "<group>"; };
+		7940B2C114DD17A8004DC895 /* DDXML.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXML.h; sourceTree = "<group>"; };
+		7940B2C214DD17A8004DC895 /* DDXMLDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLDocument.h; sourceTree = "<group>"; };
+		7940B2C314DD17A8004DC895 /* DDXMLDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLDocument.m; sourceTree = "<group>"; };
+		7940B2C414DD17A8004DC895 /* DDXMLElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLElement.h; sourceTree = "<group>"; };
+		7940B2C514DD17A8004DC895 /* DDXMLElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLElement.m; sourceTree = "<group>"; };
+		7940B2C614DD17A8004DC895 /* DDXMLNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLNode.h; sourceTree = "<group>"; };
+		7940B2C714DD17A8004DC895 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLNode.m; sourceTree = "<group>"; };
+		7940B2C914DD17A8004DC895 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLPrivate.h; sourceTree = "<group>"; };
+		7940B2CF14DD1835004DC895 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		79F7476A14DA74A500C7BAD8 /* EVNConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EVNConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79F7476E14DA74A500C7BAD8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		79F7477014DA74A500C7BAD8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -236,6 +255,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7940B2D014DD1836004DC895 /* libxml2.dylib in Frameworks */,
 				7940B25314DCEA27004DC895 /* libicucore.dylib in Frameworks */,
 				79F748B614DAB89800C7BAD8 /* Security.framework in Frameworks */,
 				79F7476F14DA74A500C7BAD8 /* UIKit.framework in Frameworks */,
@@ -368,9 +388,53 @@
 			path = Images;
 			sourceTree = "<group>";
 		};
+		7940B2BA14DD17A8004DC895 /* KissXML */ = {
+			isa = PBXGroup;
+			children = (
+				7940B2BB14DD17A8004DC895 /* Additions */,
+				7940B2BE14DD17A8004DC895 /* Categories */,
+				7940B2C114DD17A8004DC895 /* DDXML.h */,
+				7940B2C214DD17A8004DC895 /* DDXMLDocument.h */,
+				7940B2C314DD17A8004DC895 /* DDXMLDocument.m */,
+				7940B2C414DD17A8004DC895 /* DDXMLElement.h */,
+				7940B2C514DD17A8004DC895 /* DDXMLElement.m */,
+				7940B2C614DD17A8004DC895 /* DDXMLNode.h */,
+				7940B2C714DD17A8004DC895 /* DDXMLNode.m */,
+				7940B2C814DD17A8004DC895 /* Private */,
+			);
+			path = KissXML;
+			sourceTree = "<group>";
+		};
+		7940B2BB14DD17A8004DC895 /* Additions */ = {
+			isa = PBXGroup;
+			children = (
+				7940B2BC14DD17A8004DC895 /* DDXMLElementAdditions.h */,
+				7940B2BD14DD17A8004DC895 /* DDXMLElementAdditions.m */,
+			);
+			path = Additions;
+			sourceTree = "<group>";
+		};
+		7940B2BE14DD17A8004DC895 /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				7940B2BF14DD17A8004DC895 /* NSString+DDXML.h */,
+				7940B2C014DD17A8004DC895 /* NSString+DDXML.m */,
+			);
+			path = Categories;
+			sourceTree = "<group>";
+		};
+		7940B2C814DD17A8004DC895 /* Private */ = {
+			isa = PBXGroup;
+			children = (
+				7940B2C914DD17A8004DC895 /* DDXMLPrivate.h */,
+			);
+			path = Private;
+			sourceTree = "<group>";
+		};
 		79F7475F14DA74A500C7BAD8 = {
 			isa = PBXGroup;
 			children = (
+				7940B2CF14DD1835004DC895 /* libxml2.dylib */,
 				79F747A114DA766D00C7BAD8 /* Libraries */,
 				79F7477414DA74A500C7BAD8 /* EVNConnect */,
 				79F7478C14DA74A500C7BAD8 /* EVNConnectTests */,
@@ -449,6 +513,7 @@
 		79F747A114DA766D00C7BAD8 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				7940B2BA14DD17A8004DC895 /* KissXML */,
 				7940B25414DD0B29004DC895 /* DigestAddition */,
 				7940B24C14DCE82C004DC895 /* RegexKitLite */,
 				793F900214DC15BA00F30885 /* PDKeychainBindingsController */,
@@ -742,6 +807,11 @@
 				7940B25114DCE82C004DC895 /* RegexKitLite.m in Sources */,
 				7940B25914DD0B29004DC895 /* NSData+Digest.m in Sources */,
 				7940B25A14DD0B29004DC895 /* UIImage+Digest.m in Sources */,
+				7940B2CA14DD17A8004DC895 /* DDXMLElementAdditions.m in Sources */,
+				7940B2CB14DD17A8004DC895 /* NSString+DDXML.m in Sources */,
+				7940B2CC14DD17A8004DC895 /* DDXMLDocument.m in Sources */,
+				7940B2CD14DD17A8004DC895 /* DDXMLElement.m in Sources */,
+				7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -835,7 +905,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EVNConnect/EVNConnect-Prefix.pch";
-				HEADER_SEARCH_PATHS = "Libraries/Evernote/thrift/**";
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					"Libraries/Evernote/thrift/**",
+				);
 				INFOPLIST_FILE = "EVNConnect/EVNConnect-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -849,7 +922,10 @@
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EVNConnect/EVNConnect-Prefix.pch";
-				HEADER_SEARCH_PATHS = "Libraries/Evernote/thrift/**";
+				HEADER_SEARCH_PATHS = (
+					/usr/include/libxml2,
+					"Libraries/Evernote/thrift/**",
+				);
 				INFOPLIST_FILE = "EVNConnect/EVNConnect-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;

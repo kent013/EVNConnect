@@ -13,6 +13,9 @@
 
 @protocol EvernoteSessionDelegate;
 
+/*!
+ * evernote wrapper class
+ */
 @interface Evernote : NSObject<EvernoteRequestDelegate, EvernoteAuthDelegate>{
     __strong NSMutableSet *requests_;
     __strong id<EvernoteAuthProtocol> authConsumer_;

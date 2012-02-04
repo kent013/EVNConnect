@@ -58,7 +58,7 @@
     
     UIImage *image = [UIImage imageNamed:@"sample1.jpg"];
     EDAMResource *resource = [evernote_ createResourceFromUIImage:image];
-    EDAMNote *note = 
+    //EDAMNote *note = 
     [evernote_ createNoteInNotebook:notebook 
                               title:@"testnote" 
                             content:@"testnotemogemoge" 

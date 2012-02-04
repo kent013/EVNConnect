@@ -15,6 +15,7 @@
 #import "RegexKitLite.h"
 #import "UIImage+Digest.h"
 #import "NSData+Digest.h"
+#import "DDXML.h"
 
 //-----------------------------------------------------------------------------
 //Private Implementations
@@ -434,6 +435,16 @@
                 content = [NSString stringWithFormat:@"%@%@", content, resourceENML];
             }
             content = [NSString stringWithFormat:@"%@%@", content, @"</en-note>"];
+        }else{
+            NSError *error = nil;
+            DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:content options:0 error:&error];
+            for(EDAMResource *resource in resources){
+                DDXMLElement *element = [[DDXMLElement alloc] initWithName:@"en-media"];
+                [element addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:resource.mime]];
+                [element addAttribute:[DDXMLNode attributeWithName:@"hash" stringValue:[[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]]];
+                [document.rootElement addChild:element];
+            }
+            content = [document XMLString];
         }
         NSLog(@"%@", content);
         
