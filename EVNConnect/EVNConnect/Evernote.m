@@ -23,6 +23,7 @@
 @interface Evernote(PrivateImplementation)
 - (NSURL *)baseURL;
 - (EDAMNoteStoreClient *)noteStoreClient;
+- (NSString *) clearTextToENMLString:(NSString *)text;
 @end
 
 @implementation Evernote(PrivateImplementation)
@@ -65,6 +66,13 @@
     return noteStoreClient_;
 }
 
+/*!
+ * convert clear text to ENML
+ */
+- (NSString *)clearTextToENMLString:(NSString *)text{
+    text = [NSString stringWithFormat: @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n<en-note>%@</en-note>", text];
+    return text;
+}
 @end
 
 //-----------------------------------------------------------------------------
@@ -236,7 +244,53 @@
 	return nil;
 }
 
-#pragma mark - tags
+/*!
+ * remove tag for name
+ */
+- (void)removeTagForName: (NSString *)tagName{
+    EDAMTag *tag = [self tagNamed:tagName];
+    if(tag == nil){
+        return;
+    }
+    [self removeTag: tag];
+}
+
+/*!
+ * rename tag
+ */
+- (EDAMTag *)renameTag:(EDAMTag *)tag toName:(NSString *)name{
+	if (self.noteStoreClient == nil) {
+        return tag;
+    }
+    @try {
+        tag.name = name;
+        [self.noteStoreClient updateTag:authConsumer_.authToken :tag];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }    
+    return tag;
+}
+
+/*!
+ * remove tag
+ */
+- (void)removeTag:(EDAMTag *)tag{
+	if (self.noteStoreClient == nil) {
+        return;
+    }
+    @try {
+        [self.noteStoreClient expungeTag:authConsumer_.authToken :tag.guid];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
+}
+
+
+#pragma mark - notebooks
 /*!
  * list all notebooks
  */
@@ -348,6 +402,13 @@
 /*!
  * get notes in notebook
  */
+- (EDAMNoteList *)notesForNotebook:(EDAMNotebook *)notebook{
+    return [self notesForNotebookGUID:notebook.guid];
+}
+
+/*!
+ * get notes in notebook
+ */
 -  (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid{
 	if (noteStoreClient_ == nil) {
         return nil;
@@ -397,6 +458,26 @@
 }
 
 /*!
+ * add(append at end of note) resource to note
+ */
+- (void)addResourceToNote:(EDAMNote *)note resource:(EDAMResource *)resource{
+    NSString *content = note.content;
+    
+    NSError *error = nil;
+    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:content options:0 error:&error];
+    
+    DDXMLElement *element = [[DDXMLElement alloc] initWithName:@"en-media"];
+    [element addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:resource.mime]];
+    [element addAttribute:[DDXMLNode attributeWithName:@"hash" stringValue:[[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]]];
+    [document.rootElement addChild:element];
+    note.content = document.XMLString;
+    if(note.resources == nil){
+        note.resources = [[NSMutableArray alloc] init];
+    }
+    [note.resources addObject:resource];
+}
+
+/*!
  * create note in notebook with resource
  * @param target notebook
  * @param title of note
@@ -412,6 +493,8 @@
         EDAMNote *newNote = [[EDAMNote alloc] init];
         [newNote setNotebookGuid:notebook.guid];
         [newNote setTitle:title];
+        newNote.tagGuids = [[NSMutableArray alloc] init];
+        newNote.tagNames = [[NSMutableArray alloc] init];
         for(id tag in tags){
             if([tag isKindOfClass:[EDAMTag class]]){
                 [newNote.tagGuids addObject:tag];
@@ -429,37 +512,39 @@
         }
         
         if([content isMatchedByRegex:@"^<?xml"] == NO){
-            content = [NSString stringWithFormat: @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n<en-note>%@", content];
-            for(EDAMResource *resource in resources){
-                NSString * resourceENML = [NSString stringWithFormat:@"<en-media type=\"%@\" hash=\"%@\"/>", resource.mime, [[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]];
-                content = [NSString stringWithFormat:@"%@%@", content, resourceENML];
-            }
-            content = [NSString stringWithFormat:@"%@%@", content, @"</en-note>"];
-        }else{
-            NSError *error = nil;
-            DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:content options:0 error:&error];
-            for(EDAMResource *resource in resources){
-                DDXMLElement *element = [[DDXMLElement alloc] initWithName:@"en-media"];
-                [element addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:resource.mime]];
-                [element addAttribute:[DDXMLNode attributeWithName:@"hash" stringValue:[[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]]];
-                [document.rootElement addChild:element];
-            }
-            content = [document XMLString];
+            newNote.content = [self clearTextToENMLString:content];
         }
-        NSLog(@"%@", content);
+        for(EDAMResource *resource in resources){
+            [self addResourceToNote:newNote resource:resource];
+        }
         
-        [newNote setContent:content];
         [newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];
-        if(resources != nil){
-            [newNote setResources:[NSMutableArray arrayWithArray: resources]];
-        }
-        return [self.noteStoreClient createNote:authConsumer_.authToken :newNote];
+        EDAMNote *createdNote = 
+        [self.noteStoreClient createNote:authConsumer_.authToken :newNote];
+        createdNote.content = newNote.content;
+        return createdNote;
     }
     @catch (NSException *exception) {
         NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
         [self logout];
     }
 	return nil;
+}
+
+/*!
+ * update note
+ */
+-(void)updateNote:(EDAMNote *)note{
+	if (self.noteStoreClient == nil) {
+        return;
+    }
+    @try {
+        [self.noteStoreClient updateNote:authConsumer_.authToken :note];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }    
 }
 
 #pragma mark - Remove(expunge) note
@@ -471,7 +556,7 @@
         return;
     }
     @try {
-        [self.noteStoreClient expungeNote:authConsumer_.authToken :guid];
+        [self.noteStoreClient deleteNote:authConsumer_.authToken :guid];
     }
     @catch (NSException *exception) {
         NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);

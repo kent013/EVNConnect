@@ -51,19 +51,30 @@
 
 - (void) handleTestButtonTapped:(UIButton *)sender{
     //NSLog(@"%@", [evernote_ notebooks].description);
-    EDAMNotebook *notebook = [evernote_ notebookNamed:@"test3"];
+    EDAMNotebook *notebook = [evernote_ notebookNamed:@"test"];
     if(notebook == nil){
-        notebook = [evernote_ createNotebookWithTitle:@"test3"];
+        notebook = [evernote_ createNotebookWithTitle:@"test"];
     }
     
-    UIImage *image = [UIImage imageNamed:@"sample1.jpg"];
-    EDAMResource *resource = [evernote_ createResourceFromUIImage:image];
-    //EDAMNote *note = 
+    EDAMResource *resource1 = 
+    [evernote_ createResourceFromUIImage:[UIImage imageNamed:@"sample1.jpg"]];
+    EDAMNote *note = 
     [evernote_ createNoteInNotebook:notebook 
                               title:@"testnote" 
                             content:@"testnotemogemoge" 
                                tags:[NSArray arrayWithObjects:@"Photo", @"Bear", nil]
-                       andResources:[NSArray arrayWithObject:resource]];
+                       andResources:[NSArray arrayWithObject:resource1]];
+    
+    EDAMTag *tag = [evernote_ tagNamed:@"Cat"];
+    if(tag == nil){
+        tag = [evernote_ createTagWithName:@"Cat"];
+    }
+    
+    EDAMResource *resource2 = 
+    [evernote_ createResourceFromUIImage:[UIImage imageNamed:@"sample2.jpg"]];
+    [note.tagGuids addObject:tag.guid];
+    [evernote_ addResourceToNote:note resource:resource2];
+    [evernote_ updateNote:note];
     
     //NSLog(@"%@", [evernote_ findNotebooksWithPattern:@"test.*"].description);
 }

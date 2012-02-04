@@ -34,6 +34,7 @@
 		7940B2CD14DD17A8004DC895 /* DDXMLElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C514DD17A8004DC895 /* DDXMLElement.m */; };
 		7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C714DD17A8004DC895 /* DDXMLNode.m */; };
 		7940B2D014DD1836004DC895 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7940B2CF14DD1835004DC895 /* libxml2.dylib */; };
+		7940B2D514DD8BA9004DC895 /* sample2.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7940B2D414DD8BA9004DC895 /* sample2.jpg */; };
 		79F7476F14DA74A500C7BAD8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7476E14DA74A500C7BAD8 /* UIKit.framework */; };
 		79F7477114DA74A500C7BAD8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477014DA74A500C7BAD8 /* Foundation.framework */; };
 		79F7477314DA74A500C7BAD8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477214DA74A500C7BAD8 /* CoreGraphics.framework */; };
@@ -154,6 +155,7 @@
 		7940B2C714DD17A8004DC895 /* DDXMLNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDXMLNode.m; sourceTree = "<group>"; };
 		7940B2C914DD17A8004DC895 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLPrivate.h; sourceTree = "<group>"; };
 		7940B2CF14DD1835004DC895 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
+		7940B2D414DD8BA9004DC895 /* sample2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sample2.jpg; sourceTree = "<group>"; };
 		79F7476A14DA74A500C7BAD8 /* EVNConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EVNConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79F7476E14DA74A500C7BAD8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		79F7477014DA74A500C7BAD8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -384,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				7940B25D14DD0D37004DC895 /* sample1.jpg */,
+				7940B2D414DD8BA9004DC895 /* sample2.jpg */,
 			);
 			path = Images;
 			sourceTree = "<group>";
@@ -717,6 +720,7 @@
 				79F7477914DA74A500C7BAD8 /* InfoPlist.strings in Resources */,
 				79F7492914DB8D0F00C7BAD8 /* OATestServer.rb in Resources */,
 				7940B25E14DD0D37004DC895 /* sample1.jpg in Resources */,
+				7940B2D514DD8BA9004DC895 /* sample2.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
