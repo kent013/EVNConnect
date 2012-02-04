@@ -50,7 +50,13 @@
 }
 
 - (void) handleTestButtonTapped:(UIButton *)sender{
-    NSLog(@"%@", [evernote_ notebooks].description);
+    //NSLog(@"%@", [evernote_ notebooks].description);
+    EDAMNotebook *notebook = [evernote_ notebookNamed:@"test3"];
+    if(notebook == nil){
+        notebook = [evernote_ createNotebookWithTitle:@"test3"];
+    }
+    [evernote_ createNoteInNotebook:notebook title:@"testnote" andContent:@"testnotemogemoge"];
+    //NSLog(@"%@", [evernote_ findNotebooksWithPattern:@"test.*"].description);
 }
 
 - (void) handleLogoutButtonTapped:(UIButton *)sender{

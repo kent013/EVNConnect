@@ -39,22 +39,19 @@
 - (void)loadCredential;
 - (void)clearCredential;
 
-#pragma mark - Fetch note and notebook
-
-- (EDAMNotebook*)defaultNotebook;
-- (EDAMNoteList*)notesWithNotebookGUID:(EDAMGuid)guid;
+#pragma mark - notebooks
 - (NSArray*)notebooks;
-- (EDAMNote*)noteWithNoteGUID:(EDAMGuid)guid;
+- (EDAMNotebook*)notebookNamed:(NSString *)title;
+- (NSArray *)findNotebooksWithPattern:(NSString *)pattern;
+- (EDAMNotebook*)defaultNotebook;
+- (EDAMNotebook*)createNotebookWithTitle:(NSString*)title;
 
-#pragma mark - Create note and notebook
-
-- (EDAMNotebook*)createNewNotebookWithTitle:(NSString*)title;
-- (EDAMNote*)createNote2Notebook:(EDAMGuid)notebookGuid title:(NSString*)title content:(NSString*)content;
-- (EDAMNote*)createNote2Notebook:(EDAMGuid)notebookGuid title:(NSString*)title content:(NSString*)content resources:(NSArray*)resources;
-
-#pragma mark - Remove(expunge) note
-
-- (int)removeNote:(EDAMNote*)noteToBeRemoved;	// does not work
+#pragma mark - notes
+- (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid;
+- (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title andContent:(NSString*)content;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content andResources:(NSArray*)resources;
+- (void)removeNoteForGUID:(EDAMGuid)guid;
 @end
 
 @protocol EvernoteSessionDelegate <NSObject>

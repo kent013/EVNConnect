@@ -12,6 +12,7 @@
 #import "THTTPClient.h"
 #import "TBinaryProtocol.h"
 #import "PDKeychainBindings.h"
+#import "RegexKitLite.h"
 
 //-----------------------------------------------------------------------------
 //Private Implementations
@@ -37,7 +38,7 @@
  * get note Store Client
  */
 - (EDAMNoteStoreClient *)noteStoreClient {
-	if (noteStoreClient_ && [authConsumer_ isSessionValid] == NO) {
+	if (noteStoreClient_ && [authConsumer_ isSessionValid]) {
         return noteStoreClient_;
     }
             
@@ -164,44 +165,9 @@
     [authConsumer_ clearCredential];
 }
 #pragma mark - Fetch note and notebook
-
-- (EDAMNotebook*)defaultNotebook {
-	NSArray *notebooks = [self notebooks];
-    
-	if ([notebooks count] == 0)
-		return nil;
-	
-	EDAMNotebook *defaultNotebook = [notebooks objectAtIndex:0];
-	
-	if ([notebooks count] == 0)
-		return defaultNotebook;
-	
-	for (int i = 0; i < [notebooks count]; i++) {
-		EDAMNotebook* notebook = (EDAMNotebook*)[notebooks objectAtIndex:i];
-		if ([notebook defaultNotebook]) {
-			return notebook;
-		}
-	}
-	return defaultNotebook;
-}
-
--  (EDAMNoteList*)notesWithNotebookGUID:(EDAMGuid)guid {
-	EDAMNoteFilter *filter = [[EDAMNoteFilter alloc] initWithOrder:NoteSortOrder_CREATED ascending:YES words:nil notebookGuid:guid tagGuids:nil timeZone:nil inactive:NO];	
-	if (noteStoreClient_) {
-		@try {
-			return [self.noteStoreClient findNotes:authConsumer_.authToken :filter :0 :[EDAMLimitsConstants EDAM_USER_NOTES_MAX]];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return nil;
-		}
-		@finally {
-		}
-	}
-	return nil;
-}
-
+/*!
+ * list all notebooks
+ */
 - (NSArray*)notebooks {
 	if (self.noteStoreClient == nil) {
         return nil;
@@ -213,120 +179,169 @@
     @catch (NSException *exception) {
         NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
         [self logout];
+    }
+	return nil;
+}
+
+/*!
+ * get notebook for title
+ */
+- (EDAMNotebook *)notebookNamed:(NSString *)title{
+    NSString *pattern = [NSString stringWithFormat:@"^%@$", title];
+    NSArray *notebooks = [self findNotebooksWithPattern:pattern];
+    if(notebooks.count == 0){
         return nil;
     }
-    @finally {
+    return [notebooks objectAtIndex:0];
+}
+
+/*!
+ * note book with pattern
+ */
+- (NSArray *)findNotebooksWithPattern:(NSString *)pattern{
+    NSArray *notebooks = [self notebooks];
+    NSMutableArray *foundNotebooks = [[NSMutableArray alloc] init];
+    for(EDAMNotebook *notebook in notebooks){
+        if(notebook.nameIsSet && [notebook.name isMatchedByRegex:pattern]){
+            [foundNotebooks addObject:notebook];
+        }
     }
-	return [NSArray array];
+    return foundNotebooks;
 }
 
-- (EDAMNote*)noteWithNoteGUID:(EDAMGuid)guid {
-	if (self.noteStoreClient) {
-		@try {
-			return [self.noteStoreClient getNote:authConsumer_.authToken :guid :YES :YES :YES :YES];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return nil;
-		}
-		@finally {
-		}
-	}
+/*!
+ * get default notebook
+ */
+- (EDAMNotebook*)defaultNotebook {
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }    
+    @try {
+        return [noteStoreClient_ getDefaultNotebook:authConsumer_.authToken];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
+    return nil;
+}
+
+/*!
+ * create notebook
+ * when a same title notebook is already exist, it throws exception.
+ * so you might have check before creating it.
+ */
+- (EDAMNotebook*)createNotebookWithTitle:(NSString *)title{
+	if (self.noteStoreClient == nil) {
+        return nil;
+    }
+    @try {
+        EDAMNotebook *newNotebook = [[EDAMNotebook alloc] init];
+        [newNotebook setName:title];
+        return [self.noteStoreClient createNotebook:authConsumer_.authToken :newNotebook];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
 	return nil;
 }
 
-#pragma mark - Create note and notebook
+#pragma mark - notes
+/*!
+ * get notes in notebook
+ */
+-  (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid{
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    EDAMNoteList *notelist = nil;
+	EDAMNoteFilter *filter = [[EDAMNoteFilter alloc] initWithOrder:NoteSortOrder_CREATED ascending:YES words:nil notebookGuid:guid tagGuids:nil timeZone:nil inactive:NO];	
+    @try {
+        notelist = [self.noteStoreClient findNotes:authConsumer_.authToken :filter :0 :[EDAMLimitsConstants EDAM_USER_NOTES_MAX]];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
+	return notelist;
+}
 
-- (EDAMNotebook*)createNewNotebookWithTitle:(NSString*)title {
-	EDAMNotebook *createdNewNotebook = nil;
-	if (self.noteStoreClient) {
-		@try {
-			EDAMNotebook *newNotebook = [[EDAMNotebook alloc] init];
-			[newNotebook setName:title];
-			createdNewNotebook = [self.noteStoreClient createNotebook:authConsumer_.authToken :newNotebook];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return nil;
-		}
-		@finally {
-			if (createdNewNotebook)
-				return createdNewNotebook;
-		}
-	}
+/*!
+ * note for note guid
+ */
+- (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid{
+	if (self.noteStoreClient == nil) {
+        return nil;
+    }
+    
+    @try {
+        return [self.noteStoreClient getNote:authConsumer_.authToken :guid :YES :YES :YES :YES];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
 	return nil;
 }
 
-- (EDAMNote*)createNote2Notebook:(EDAMGuid)notebookGuid title:(NSString*)title content:(NSString*)content {
-	EDAMNote *createdNewNote = nil;
-	if (self.noteStoreClient) {
-		@try {
-			EDAMNote *newNote = [[EDAMNote alloc] init];
-			[newNote setNotebookGuid:notebookGuid];
-			[newNote setTitle:title];
-			[newNote setContent:content];
-			[newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];
-			createdNewNote = [self.noteStoreClient createNote:authConsumer_.authToken :newNote];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return nil;
-		}
-		@finally {
-			if (createdNewNote)
-				return createdNewNote;
-		}
-	}
+/*!
+ * create note in notebook
+ */
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title andContent:(NSString *)content{
+	return [self createNoteInNotebook:notebook title:title content:content andResources:nil];
+}
+
+/*!
+ * create note in notebook with resource
+ */
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content andResources:(NSArray *)resources{
+	if (self.noteStoreClient == nil) {
+        return nil;
+    }
+    @try {
+        EDAMNote *newNote = [[EDAMNote alloc] init];
+        [newNote setNotebookGuid:notebook.guid];
+        [newNote setTitle:title];
+        
+        
+        if([content isMatchedByRegex:@"^<?xml"] == NO){
+            content = [NSString stringWithFormat: @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n<en-note>%@", content];
+            for(EDAMResource *resource in resources){
+                NSString * imageENML = [NSString stringWithFormat:@"<en-media type=\"%@\" hash=\"%@\"/>", resource.mime, resource.data.hash];
+                content = [NSString stringWithFormat:@"%@%@", content, imageENML];
+            }
+            content = [NSString stringWithFormat:@"%@%@", content, @"</en-note>"];
+        }
+        
+        [newNote setContent:content];
+        [newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];
+        if(resources != nil){
+            [newNote setResources:[NSMutableArray arrayWithArray: resources]];
+        }
+        return [self.noteStoreClient createNote:authConsumer_.authToken :newNote];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
 	return nil;
 }
 
-- (EDAMNote*)createNote2Notebook:(EDAMGuid)notebookGuid title:(NSString*)title content:(NSString*)content resources:(NSArray*)resources {
-	EDAMNote *createdNewNote = nil;
-	if (self.noteStoreClient) {
-		@try {
-			EDAMNote *newNote = [[EDAMNote alloc] init];
-			[newNote setNotebookGuid:notebookGuid];
-			[newNote setTitle:title];
-			[newNote setContent:content];
-			[newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];
-			[newNote setResources:[NSMutableArray arrayWithArray: resources]];
-			createdNewNote = [self.noteStoreClient createNote:authConsumer_.authToken :newNote];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return nil;
-		}
-		@finally {
-			if (createdNewNote)
-				return createdNewNote;
-		}
-	}
-	return nil;
-}
-
-#pragma mark - Remove(expunge) note, but not supported?
-
-// currently not supported to remove notes with API....?
-
-- (int)removeNote:(EDAMNote*)noteToBeRemoved {
-	int result = 0;
-	if (self.noteStoreClient) {
-		@try {
-			result = [self.noteStoreClient expungeNote:authConsumer_.authToken :[noteToBeRemoved guid]];
-		}
-		@catch (NSException *exception) {
-			NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
-			[self logout];
-			return result;
-		}
-		@finally {
-			return result;
-		}
-	}
-	return result;
+#pragma mark - Remove(expunge) note
+/*!
+ * remove note
+ */
+- (void)removeNoteForGUID:(EDAMGuid)guid{
+	if (self.noteStoreClient == nil) {
+        return;
+    }
+    @try {
+        [self.noteStoreClient expungeNote:authConsumer_.authToken :guid];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [self logout];
+    }
 }
 @end
