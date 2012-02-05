@@ -35,6 +35,7 @@
 		7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B2C714DD17A8004DC895 /* DDXMLNode.m */; };
 		7940B2D014DD1836004DC895 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7940B2CF14DD1835004DC895 /* libxml2.dylib */; };
 		7940B2D514DD8BA9004DC895 /* sample2.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7940B2D414DD8BA9004DC895 /* sample2.jpg */; };
+		7940B32914DEE3F8004DC895 /* EvernoteHTTPClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B32814DEE3F7004DC895 /* EvernoteHTTPClient.m */; };
 		79F7476F14DA74A500C7BAD8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7476E14DA74A500C7BAD8 /* UIKit.framework */; };
 		79F7477114DA74A500C7BAD8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477014DA74A500C7BAD8 /* Foundation.framework */; };
 		79F7477314DA74A500C7BAD8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F7477214DA74A500C7BAD8 /* CoreGraphics.framework */; };
@@ -156,6 +157,8 @@
 		7940B2C914DD17A8004DC895 /* DDXMLPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDXMLPrivate.h; sourceTree = "<group>"; };
 		7940B2CF14DD1835004DC895 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		7940B2D414DD8BA9004DC895 /* sample2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = sample2.jpg; sourceTree = "<group>"; };
+		7940B32714DEE3F6004DC895 /* EvernoteHTTPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteHTTPClient.h; sourceTree = "<group>"; };
+		7940B32814DEE3F7004DC895 /* EvernoteHTTPClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteHTTPClient.m; sourceTree = "<group>"; };
 		79F7476A14DA74A500C7BAD8 /* EVNConnect.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EVNConnect.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		79F7476E14DA74A500C7BAD8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		79F7477014DA74A500C7BAD8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -581,6 +584,8 @@
 				79F7493714DBAA6600C7BAD8 /* EvernoteAuth.m */,
 				79F7492E14DB916300C7BAD8 /* EvernoteAuthOAuthConsumer.h */,
 				79F7492F14DB916400C7BAD8 /* EvernoteAuthOAuthConsumer.m */,
+				7940B32714DEE3F6004DC895 /* EvernoteHTTPClient.h */,
+				7940B32814DEE3F7004DC895 /* EvernoteHTTPClient.m */,
 			);
 			path = EVNConnect;
 			sourceTree = "<group>";
@@ -816,6 +821,7 @@
 				7940B2CC14DD17A8004DC895 /* DDXMLDocument.m in Sources */,
 				7940B2CD14DD17A8004DC895 /* DDXMLElement.m in Sources */,
 				7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */,
+				7940B32914DEE3F8004DC895 /* EvernoteHTTPClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

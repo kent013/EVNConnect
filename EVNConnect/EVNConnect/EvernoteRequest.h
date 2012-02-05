@@ -8,57 +8,60 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "UserStore.h"
+#import "NoteStore.h"
+
+@class Evernote;
 
 @protocol EvernoteRequestDelegate;
+@protocol EvernoteContextDelegate;
 
-enum {
-  kEvernoteRequestStateReady,
-  kEvernoteRequestStateLoading,
-  kEvernoteRequestStateComplete,
-  kEvernoteRequestStateError
-};
-typedef NSUInteger EvernoteRequestState;
 @interface EvernoteRequest : NSObject {
-  __weak id<EvernoteRequestDelegate> delegate_;
-  NSString *            url_;
-  NSString *            httpMethod_;
-  NSMutableDictionary * params_;
-  NSURLConnection *     connection_;
-  NSMutableData *       responseText_;
-  EvernoteRequestState        state_;
-  NSError *             error_;
+	EDAMNoteStoreClient	*noteStoreClient_;
+    __strong NSString *authToken_;
+    id<EvernoteContextDelegate> contextDelegate_;
 }
+@property (nonatomic, weak) id<EvernoteRequestDelegate> delegate;
 
+-(id) initWithAuthToken:(NSString *)authToken noteStoreClient:(EDAMNoteStoreClient *)client delegate:(id<EvernoteRequestDelegate>) delegate andContextDelegate:(id<EvernoteContextDelegate>)contextDelegate;
 
-@property(nonatomic,weak) id<EvernoteRequestDelegate> delegate;
-@property(nonatomic,strong) NSString *url;
-@property(nonatomic,strong) NSString *httpMethod;
-@property(nonatomic,strong) NSMutableDictionary *params;
-@property(nonatomic,strong) NSURLConnection * connection;
-@property(nonatomic,strong) NSMutableData *responseText;
-@property(nonatomic,readonly) EvernoteRequestState state;
-@property(nonatomic,strong) NSError *error;
+#pragma mark - resource
+- (EDAMResource *) createResourceFromUIImage:(UIImage *)image;
+- (EDAMResource *) createResourceFromImageData:(NSData *)image andMime:(NSString *)mime;
 
+#pragma mark - tags
+- (NSArray *)tags;
+- (EDAMTag *)tagNamed: (NSString *)name;
+- (NSArray *)findTagsWithPattern: (NSString *)pattern;
+- (EDAMTag *)createTagWithName: (NSString *)tag;
+- (EDAMTag *)renameTag:(EDAMTag *)tag toName:(NSString *)name;
+- (void)removeTagForName: (NSString *)tagName;
+- (void)removeTag:(EDAMTag *)tag;
 
-+ (NSString*)serializeURL:(NSString*)baseUrl
-                   params:(NSDictionary*)params;
+#pragma mark - notebooks
+- (NSArray *)notebooks;
+- (EDAMNotebook*)notebookNamed:(NSString *)title;
+- (NSArray *)findNotebooksWithPattern:(NSString *)pattern;
+- (EDAMNotebook*)defaultNotebook;
+- (EDAMNotebook*)createNotebookWithTitle:(NSString*)title;
+- (void) updateNote: (EDAMNote *)note;
 
-+ (NSString*)serializeURL:(NSString*)baseUrl
-                   params:(NSDictionary*)params
-               httpMethod:(NSString*)httpMethod;
+#pragma mark - notes
+- (EDAMNoteList*)notesForNotebook:(EDAMNotebook *)notebook;
+- (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid;
+- (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title andContent:(NSString*)content;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content andTags:(NSArray*)tags;
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
+- (void)addResourceToNote:(EDAMNote *)note resource:(EDAMResource *)resource;
+- (void)removeNoteForGUID:(EDAMGuid)guid;
+@end
 
-+ (EvernoteRequest*)getRequestWithParams:(NSMutableDictionary*) params
-                        httpMethod:(NSString*) httpMethod
-                          delegate:(id<EvernoteRequestDelegate>)delegate
-                        requestURL:(NSString*) url;
-- (BOOL) loading;
-
-- (void) connect;
-
+@protocol EvernoteContextDelegate <NSObject>
+- (void)request:(EvernoteRequest *)request didFailWithException:(NSException *)exception;
 @end
 
 @protocol EvernoteRequestDelegate <NSObject>
-
 @optional
 - (void)requestLoading:(EvernoteRequest*)request;
 - (void)request:(EvernoteRequest*)request didReceiveResponse:(NSURLResponse*)response;

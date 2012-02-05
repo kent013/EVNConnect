@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "EVNConnect.h"
 
-@interface MainViewController : UIViewController<EvernoteSessionDelegate>{
+@interface MainViewController : UIViewController<EvernoteSessionDelegate, EvernoteRequestDelegate>{
     __strong Evernote *evernote_;
 }
 @property (nonatomic, readonly) Evernote *evernote;

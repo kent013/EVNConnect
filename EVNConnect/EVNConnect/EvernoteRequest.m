@@ -7,290 +7,433 @@
 //
 
 #import "EvernoteRequest.h"
-#import "SBJson.h"
+#import "Evernote.h"
+#import "RegexKitLite.h"
+#import "UIImage+Digest.h"
+#import "NSData+Digest.h"
+#import "DDXML.h"
 
-static NSString *kUserAgent = @"EvernoteConnect";
-static NSString *kStringBoundary = @"3i2ndDfv2rTHiSisAbouNdArYfORhtTPEefj3q2f";
-static const int kGeneralErrorCode = 10000;
-
-static const NSTimeInterval kTimeoutInterval = 180.0;
-
-@interface EvernoteRequest ()
-@property (nonatomic,readwrite) EvernoteRequestState state;
+//-----------------------------------------------------------------------------
+//Private Implementations
+//-----------------------------------------------------------------------------
+@interface EvernoteRequest(PrivateImplementation)
+- (NSString *) clearTextToENMLString:(NSString *)text;
 @end
 
+@implementation EvernoteRequest(PrivateImplementation)
+/*!
+ * convert clear text to ENML
+ */
+- (NSString *)clearTextToENMLString:(NSString *)text{
+    text = [NSString stringWithFormat: @"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n<en-note>%@</en-note>", text];
+    return text;
+}
+@end
+
+//-----------------------------------------------------------------------------
+//Public Implementations
+//-----------------------------------------------------------------------------
 @implementation EvernoteRequest
+@synthesize delegate;
 
-@synthesize delegate = delegate_,
-            url = url_,
-            httpMethod = httpMethod_,
-            params = params_,
-            connection = connection_,
-            responseText = responseText_,
-            state = state_,
-            error = error_;
-+ (EvernoteRequest*)getRequestWithParams:(NSMutableDictionary*) params
-                         httpMethod:(NSString*) httpMethod
-                           delegate:(id<EvernoteRequestDelegate>) delegate
-                         requestURL:(NSString*) url {
-
-  EvernoteRequest *request = [[EvernoteRequest alloc] init];
-  request.delegate = delegate;
-  request.url = url;
-  request.httpMethod = httpMethod;
-  request.params = params;
-  request.connection = nil;
-  request.responseText = nil;
-
-  return request;
-}
-
-+ (NSString*)serializeURL:(NSString*)baseUrl
-                   params:(NSDictionary*)params {
-  return [self serializeURL:baseUrl params:params httpMethod:@"GET"];
-}
-+ (NSString*)serializeURL:(NSString*)baseUrl
-                   params:(NSDictionary*)params
-               httpMethod:(NSString*)httpMethod {
-
-  NSURL *parsedURL = [NSURL URLWithString:baseUrl];
-  NSString *queryPrefix = parsedURL.query ? @"&" : @"?";
-
-  NSMutableArray *pairs = [NSMutableArray array];
-  for (NSString *key in [params keyEnumerator]) {
-    if (([[params valueForKey:key] isKindOfClass:[UIImage class]])
-        ||([[params valueForKey:key] isKindOfClass:[NSData class]])) {
-      if ([httpMethod isEqualToString:@"GET"]) {
-        NSLog(@"can not use GET to upload a file");
-      }
-      continue;
+/*!
+ * initialize
+ */
+- (id)initWithAuthToken:(NSString *)authToken noteStoreClient:(EDAMNoteStoreClient *)client delegate:(id<EvernoteRequestDelegate>)inDelegate andContextDelegate:(id<EvernoteContextDelegate>)contextDelegate{
+    self = [super init];
+    if(self){
+        authToken_ = authToken;
+        noteStoreClient_ = client;
+        contextDelegate_ = contextDelegate;
+        self.delegate = inDelegate;
     }
-
-    NSString *escaped_value = (__bridge NSString*)CFURLCreateStringByAddingPercentEscapes(
-                                NULL,                                 (__bridge CFStringRef)[params objectForKey:key],
-                                NULL,                                 (__bridge CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                kCFStringEncodingUTF8);
-
-    [pairs addObject:[NSString stringWithFormat:@"%@=%@", key, escaped_value]];
-  }
-  NSString *query = [pairs componentsJoinedByString:@"&"];
-
-  return [NSString stringWithFormat:@"%@%@%@", baseUrl, queryPrefix, query];
+    return self;
 }
-- (void)utfAppendBody:(NSMutableData*)body data:(NSString*)data {
-  [body appendData:[data dataUsingEncoding:NSUTF8StringEncoding]];
-}
-- (NSMutableData*)generatePostBody {
-  NSMutableData *body = [NSMutableData data];
-  NSString *endLine = [NSString stringWithFormat:@"\r\n--%@\r\n", kStringBoundary];
-  NSMutableDictionary *dataDictionary = [NSMutableDictionary dictionary];
-
-  [self utfAppendBody:body data:[NSString stringWithFormat:@"--%@\r\n", kStringBoundary]];
-
-  for (id key in [params_ keyEnumerator]) {
-
-    if (([[params_ valueForKey:key] isKindOfClass:[UIImage class]])
-      ||([[params_ valueForKey:key] isKindOfClass:[NSData class]])) {
-
-      [dataDictionary setObject:[params_ valueForKey:key] forKey:key];
-      continue;
-
+#pragma mark - tags
+/*!
+ * list tags
+ */
+- (NSArray *)tags{
+	if (noteStoreClient_ == nil) {
+        return nil;
     }
-
-    [self utfAppendBody:body
-                  data:[NSString
-                        stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n",
-                        key]];
-    [self utfAppendBody:body data:[params_ valueForKey:key]];
-
-    [self utfAppendBody:body data:endLine];
-  }
-
-  if ([dataDictionary count] > 0) {
-    for (id key in dataDictionary) {
-      NSObject *dataParam = [dataDictionary valueForKey:key];
-      if ([dataParam isKindOfClass:[UIImage class]]) {
-        NSData *imageData = UIImagePNGRepresentation((UIImage*)dataParam);
-        [self utfAppendBody:body
-                       data:[NSString stringWithFormat:
-                             @"Content-Disposition: form-data; filename=\"%@\"\r\n", key]];
-        [self utfAppendBody:body
-                       data:[NSString stringWithString:@"Content-Type: image/png\r\n\r\n"]];
-        [body appendData:imageData];
-      } else {
-        NSAssert([dataParam isKindOfClass:[NSData class]],
-                 @"dataParam must be a UIImage or NSData");
-        [self utfAppendBody:body
-                       data:[NSString stringWithFormat:
-                             @"Content-Disposition: form-data; filename=\"%@\"\r\n", key]];
-        [self utfAppendBody:body
-                       data:[NSString stringWithString:@"Content-Type: content/unknown\r\n\r\n"]];
-        [body appendData:(NSData*)dataParam];
-      }
-      [self utfAppendBody:body data:endLine];
-
+    @try {
+        NSArray *tags = [noteStoreClient_ listTags:authToken_];
+        return [NSArray arrayWithArray:tags];
     }
-  }
-
-  return body;
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
 }
-- (id)formError:(NSInteger)code userInfo:(NSDictionary*) errorData {
-   return [NSError errorWithDomain:@"facebookErrDomain" code:code userInfo:errorData];
 
+/*!
+ * get tag for title
+ */
+- (EDAMNotebook *)tagNamed:(NSString *)name{
+    NSString *pattern = [NSString stringWithFormat:@"^%@$", name];
+    NSArray *tags = [self findTagsWithPattern:pattern];
+    if(tags.count == 0){
+        return nil;
+    }
+    return [tags objectAtIndex:0];
 }
-- (id)parseJsonResponse:(NSData*)data error:(NSError **)error {
 
-  NSString *responseString = [[NSString alloc] initWithData:data
-                                                    encoding:NSUTF8StringEncoding]
-                             ;
-  SBJsonParser *jsonParser = [[SBJsonParser alloc] init];
-  if ([responseString isEqualToString:@"true"]) {
-    return [NSDictionary dictionaryWithObject:@"true" forKey:@"result"];
-  } else if ([responseString isEqualToString:@"false"]) {
-    if (error != nil) {
-      *error = [self formError:kGeneralErrorCode
-                      userInfo:[NSDictionary
-                                dictionaryWithObject:@"This operation can not be completed"
-                                forKey:@"error_msg"]];
+/*!
+ * note book with pattern
+ */
+- (NSArray *)findTagsWithPattern:(NSString *)pattern{
+    NSArray *tags = [self tags];
+    NSMutableArray *foundTags = [[NSMutableArray alloc] init];
+    for(EDAMNotebook *tag in tags){
+        if(tag.nameIsSet && [tag.name isMatchedByRegex:pattern]){
+            [foundTags addObject:tag];
+        }
+    }
+    return foundTags;
+}
+
+
+
+/*!
+ * create tag
+ * when a same title tag is already exist, it throws exception.
+ * so you might have check before creating it.
+ */
+- (EDAMTag*)createTagWithName:(NSString *)name{
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    @try {
+        EDAMTag *tag = [[EDAMTag alloc] init];
+        tag.name = name;
+        return [noteStoreClient_ createTag: authToken_ :tag];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
+}
+
+/*!
+ * remove tag for name
+ */
+- (void)removeTagForName: (NSString *)tagName{
+    EDAMTag *tag = [self tagNamed:tagName];
+    if(tag == nil){
+        return;
+    }
+    [self removeTag: tag];
+}
+
+/*!
+ * rename tag
+ */
+- (EDAMTag *)renameTag:(EDAMTag *)tag toName:(NSString *)name{
+	if (noteStoreClient_ == nil) {
+        return tag;
+    }
+    @try {
+        tag.name = name;
+        [noteStoreClient_ updateTag:authToken_ :tag];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }    
+    return tag;
+}
+
+/*!
+ * remove tag
+ */
+- (void)removeTag:(EDAMTag *)tag{
+	if (noteStoreClient_ == nil) {
+        return;
+    }
+    @try {
+        [noteStoreClient_ expungeTag:authToken_ :tag.guid];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+}
+
+
+#pragma mark - notebooks
+/*!
+ * list all notebooks
+ */
+- (NSArray*)notebooks {
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    @try {
+        NSArray *notebooks = [noteStoreClient_ listNotebooks:authToken_];
+        return [NSArray arrayWithArray:notebooks];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
+}
+
+/*!
+ * get notebook for title
+ */
+- (EDAMNotebook *)notebookNamed:(NSString *)title{
+    NSString *pattern = [NSString stringWithFormat:@"^%@$", title];
+    NSArray *notebooks = [self findNotebooksWithPattern:pattern];
+    if(notebooks.count == 0){
+        return nil;
+    }
+    return [notebooks objectAtIndex:0];
+}
+
+/*!
+ * note book with pattern
+ */
+- (NSArray *)findNotebooksWithPattern:(NSString *)pattern{
+    NSArray *notebooks = [self notebooks];
+    NSMutableArray *foundNotebooks = [[NSMutableArray alloc] init];
+    for(EDAMNotebook *notebook in notebooks){
+        if(notebook.nameIsSet && [notebook.name isMatchedByRegex:pattern]){
+            [foundNotebooks addObject:notebook];
+        }
+    }
+    return foundNotebooks;
+}
+
+/*!
+ * get default notebook
+ */
+- (EDAMNotebook*)defaultNotebook {
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }    
+    @try {
+        return [noteStoreClient_ getDefaultNotebook:authToken_];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
     }
     return nil;
-  }
-
-
-  id result = [jsonParser objectWithString:responseString];
-
-  if (![result isKindOfClass:[NSArray class]]) {
-    if ([result objectForKey:@"error"] != nil) {
-      if (error != nil) {
-        *error = [self formError:kGeneralErrorCode
-                        userInfo:result];
-      }
-      return nil;
-    }
-
-    if ([result objectForKey:@"error_code"] != nil) {
-      if (error != nil) {
-        *error = [self formError:[[result objectForKey:@"error_code"] intValue] userInfo:result];
-      }
-      return nil;
-    }
-
-    if ([result objectForKey:@"error_msg"] != nil) {
-      if (error != nil) {
-        *error = [self formError:kGeneralErrorCode userInfo:result];
-      }
-    }
-
-    if ([result objectForKey:@"error_reason"] != nil) {
-      if (error != nil) {
-        *error = [self formError:kGeneralErrorCode userInfo:result];
-      }
-    }
-  }
-
-  return result;
-
 }
-- (void)failWithError:(NSError*)error {
-  if ([delegate_ respondsToSelector:@selector(request:didFailWithError:)]) {
-    [delegate_ request:self didFailWithError:error];
-  }
-  self.state = kEvernoteRequestStateError;
+
+/*!
+ * create notebook
+ * when a same title notebook is already exist, it throws exception.
+ * so you might have check before creating it.
+ */
+- (EDAMNotebook*)createNotebookWithTitle:(NSString *)title{
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    @try {
+        EDAMNotebook *newNotebook = [[EDAMNotebook alloc] init];
+        [newNotebook setName:title];
+        return [noteStoreClient_ createNotebook:authToken_ :newNotebook];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
 }
-- (void)handleResponseData:(NSData*)data {
-  if ([delegate_ respondsToSelector:
-      @selector(request:didLoadRawResponse:)]) {
-    [delegate_ request:self didLoadRawResponse:data];
-  }
+
+#pragma mark - resource
+/*!
+ * create resource
+ */
+- (EDAMResource *) createResourceFromUIImage:(UIImage *)image{
+    NSData * imageNSData = UIImageJPEGRepresentation(image, 1.0);
+    return [self createResourceFromImageData:imageNSData andMime:@"image/jpeg"];
+}
+
+/*!
+ * create resource from NSData
+ */
+- (EDAMResource *)createResourceFromImageData:(NSData *)imageNSData andMime:(NSString *)mime{
+    NSString * hash = imageNSData.MD5DigestString;
+    EDAMResource * imageResource = nil;
     
-  NSError *error = nil;
-  id result = [self parseJsonResponse:data error:&error];
-  self.error = error;  
+    EDAMData * imageData = [[EDAMData alloc] initWithBodyHash:[hash dataUsingEncoding: NSASCIIStringEncoding] size:[imageNSData length] body:imageNSData];
+    EDAMResourceAttributes * imageAttributes = [[EDAMResourceAttributes alloc] init];    
+    imageResource  = [[EDAMResource alloc]init];
+    [imageResource setMime:mime];
+    [imageResource setData:imageData];
+    [imageResource setAttributes:imageAttributes];
+    return imageResource;    
+}
 
-  if ([delegate_ respondsToSelector:@selector(request:didLoad:)] ||
-      [delegate_ respondsToSelector:
-          @selector(request:didFailWithError:)]) {
+#pragma mark - notes
+/*!
+ * get notes in notebook
+ */
+- (EDAMNoteList *)notesForNotebook:(EDAMNotebook *)notebook{
+    return [self notesForNotebookGUID:notebook.guid];
+}
 
-    if (error) {
-      [self failWithError:error];
-    } else if ([delegate_ respondsToSelector:
-        @selector(request:didLoad:)]) {
-      [delegate_ request:self didLoad:(result == nil ? data : result)];
+/*!
+ * get notes in notebook
+ */
+-  (EDAMNoteList*)notesForNotebookGUID:(EDAMGuid)guid{
+	if (noteStoreClient_ == nil) {
+        return nil;
     }
-
-  }
-
+    EDAMNoteList *notelist = nil;
+	EDAMNoteFilter *filter = [[EDAMNoteFilter alloc] initWithOrder:NoteSortOrder_CREATED ascending:YES words:nil notebookGuid:guid tagGuids:nil timeZone:nil inactive:NO];	
+    @try {
+        notelist = [noteStoreClient_ findNotes:authToken_ :filter :0 :[EDAMLimitsConstants EDAM_USER_NOTES_MAX]];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return notelist;
 }
 
-
-
-- (BOOL)loading {
-  return !!connection_;
-}
-- (void)connect {
-
-  if ([delegate_ respondsToSelector:@selector(requestLoading:)]) {
-    [delegate_ requestLoading:self];
-  }
-
-  NSString *url = [[self class] serializeURL:url_ params:params_ httpMethod:httpMethod_];
-  NSMutableURLRequest *request =
-    [NSMutableURLRequest requestWithURL:[NSURL URLWithString:url]
-                            cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
-                        timeoutInterval:kTimeoutInterval];
-  [request setValue:kUserAgent forHTTPHeaderField:@"User-Agent"];
-
-
-  [request setHTTPMethod:self.httpMethod];
-  if ([self.httpMethod isEqualToString: @"POST"]) {
-    NSString *contentType = [NSString
-                             stringWithFormat:@"multipart/form-data; boundary=%@", kStringBoundary];
-    [request setValue:contentType forHTTPHeaderField:@"Content-Type"];
-
-    [request setHTTPBody:[self generatePostBody]];
-  }
-
-  connection_ = [[NSURLConnection alloc] initWithRequest:request delegate:self];
-  self.state = kEvernoteRequestStateLoading;
+/*!
+ * note for note guid
+ */
+- (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid{
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    
+    @try {
+        return [noteStoreClient_ getNote:authToken_ :guid :YES :YES :YES :YES];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
 }
 
-- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse*)response {
-  responseText_ = [[NSMutableData alloc] init];
-
-  NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-  if ([delegate_ respondsToSelector:
-      @selector(request:didReceiveResponse:)]) {
-    [delegate_ request:self didReceiveResponse:httpResponse];
-  }
+/*!
+ * create note in notebook
+ */
+- (EDAMNote *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title andContent:(NSString *)content{
+    return [self createNoteInNotebook:notebook title:title content:content tags:nil andResources:nil];
 }
 
-- (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)data {
-  [responseText_ appendData:data];
+/*!
+ * create note in notebook with tags
+ */
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content andTags:(NSArray *)tags{
+	return [self createNoteInNotebook:notebook title:title content:content tags:tags andResources:nil];
 }
 
-- (NSCachedURLResponse*)connection:(NSURLConnection*)connection
-    willCacheResponse:(NSCachedURLResponse*)cachedResponse {
-  return nil;
+/*!
+ * add(append at end of note) resource to note
+ */
+- (void)addResourceToNote:(EDAMNote *)note resource:(EDAMResource *)resource{
+    NSString *content = note.content;
+    
+    NSError *error = nil;
+    DDXMLDocument *document = [[DDXMLDocument alloc] initWithXMLString:content options:0 error:&error];
+    
+    DDXMLElement *element = [[DDXMLElement alloc] initWithName:@"en-media"];
+    [element addAttribute:[DDXMLNode attributeWithName:@"type" stringValue:resource.mime]];
+    [element addAttribute:[DDXMLNode attributeWithName:@"hash" stringValue:[[NSString alloc] initWithData:resource.data.bodyHash encoding:NSASCIIStringEncoding]]];
+    [document.rootElement addChild:element];
+    note.content = document.XMLString;
+    if(note.resources == nil){
+        note.resources = [[NSMutableArray alloc] init];
+    }
+    [note.resources addObject:resource];
 }
 
-- (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-  [self handleResponseData:responseText_];
-
-  self.responseText = nil;
-  self.connection = nil;
-
-  if (self.state != kEvernoteRequestStateError) {
-    self.state = kEvernoteRequestStateComplete;
-  }
+/*!
+ * create note in notebook with resource
+ * @param target notebook
+ * @param title of note
+ * @param content of note
+ * @param array of tag, can be EDAMTag or NSString
+ * @param array of resource, each item must be instance of EDAMResource.
+ */
+- (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString *)title content:(NSString *)content tags:(NSArray *)tags andResources:(NSArray *)resources{
+	if (noteStoreClient_ == nil) {
+        return nil;
+    }
+    @try {
+        EDAMNote *newNote = [[EDAMNote alloc] init];
+        [newNote setNotebookGuid:notebook.guid];
+        [newNote setTitle:title];
+        newNote.tagGuids = [[NSMutableArray alloc] init];
+        newNote.tagNames = [[NSMutableArray alloc] init];
+        for(id tag in tags){
+            if([tag isKindOfClass:[EDAMTag class]]){
+                [newNote.tagGuids addObject:tag];
+            }else if([tag isKindOfClass:[NSString class]]){
+                [newNote.tagNames addObject:tag];
+            }
+        }
+        
+        for(id resource in resources){
+            if([resource isKindOfClass:[EDAMResource class]] == NO){
+                @throw [NSException exceptionWithName: @"IllegalArgument"
+                                               reason: @"resource must be EDAMResource"
+                                             userInfo: nil];
+            }
+        }
+        
+        if([content isMatchedByRegex:@"^<?xml"] == NO){
+            newNote.content = [self clearTextToENMLString:content];
+        }
+        for(EDAMResource *resource in resources){
+            [self addResourceToNote:newNote resource:resource];
+        }
+        
+        [newNote setCreated:(long long)[[NSDate date] timeIntervalSince1970] * 1000];
+        EDAMNote *createdNote = 
+        [noteStoreClient_ createNote:authToken_ :newNote];
+        createdNote.content = newNote.content;
+        return createdNote;
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+	return nil;
 }
 
-- (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error {
-  [self failWithError:error];
-
-  self.responseText = nil;
-  self.connection = nil;
-
-  self.state = kEvernoteRequestStateError;
+/*!
+ * update note
+ */
+-(void)updateNote:(EDAMNote *)note{
+	if (noteStoreClient_ == nil) {
+        return;
+    }
+    @try {
+        [noteStoreClient_ updateNote:authToken_ :note];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }    
 }
 
+#pragma mark - Remove(expunge) note
+/*!
+ * remove note
+ */
+- (void)removeNoteForGUID:(EDAMGuid)guid{
+	if (noteStoreClient_ == nil) {
+        return;
+    }
+    @try {
+        [noteStoreClient_ deleteNote:authToken_ :guid];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
+        [contextDelegate_ request:self didFailWithException:exception];
+    }
+}
 @end
