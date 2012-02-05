@@ -7,12 +7,12 @@ check out [EvernoteRequest.h](https://github.com/kent013/EVNConnect/blob/master/
 
 Concept
 ----------------------------------------------
-1, Authentication with OAuth  
+### 1, Authentication with OAuth  
 I don't want to store username and password in our app.  
 (I don't need dialog, supports only oauth using safari for multitasking ios)
 
-2, Request delegate  
-I want to know the progress of request, implemented subclass of thrift's THTTPClient, EvernoteHTTPClient to do it. And added EvernoteRequestDelegate.
+### 2, Request delegate  
+I want to know the progress of request, implemented subclass of thrift's THTTPClient, EvernoteHTTPClient to do it. And added EvernoteRequestDelegate.  
 
     @protocol EvernoteRequestDelegate <NSObject>
     @optional
@@ -29,12 +29,18 @@ I want to know the progress of request, implemented subclass of thrift's THTTPCl
 
 because of implementation of evernote-api, I could not make request asynchronous.
 
+### 3, Wrapper of NoteStoreClient
+Something like below.
+    EvernoteRequest *request = [evernote_ requestWithDelegate:self];
+    NSArray *notebooks = [evernote_ notebooks];
+    EDAMNotebook *notebook = [request notebookNamed:@"test"];
+
 Usage
 ---------------------------------
-1, Copy source files in [EVNConnect](https://github.com/kent013/EVNConnect/tree/master/EVNConnect/EVNConnect) into your project.
+### 1, Copy source files in [EVNConnect](https://github.com/kent013/EVNConnect/tree/master/EVNConnect/EVNConnect) into your project.
 
 
-2, Put 3rd party libraries into your project and configure them.
+### 2, Put 3rd party libraries into your project and configure them.
 Libraries are stored in [Libraries](https://github.com/kent013/EVNConnect/tree/master/Libraries)
  * Evernote  
 [ARC enable version of evernote api 1.20](http://stackoverflow.com/questions/8684039/evernote-cocoa-sdk-not-compiling-for-ios5). 
@@ -56,7 +62,7 @@ To use OAuth, Security.framework and libxml2.dylib are needed.
 To generate md5 hash, I forget where it comes. 
 
 
-3, Code.  
+### 3, Code.  
 
 [MainViewController.h](https://github.com/kent013/EVNConnect/blob/master/EVNConnect/MainViewController.h)
 
