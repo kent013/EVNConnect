@@ -25,5 +25,10 @@
 @end
 
 @protocol EvernoteHTTPClientDelegate <NSObject>
-
+- (void)clientLoading:(EvernoteHTTPClient*)client;
+- (void)client:(EvernoteHTTPClient*)client didReceiveResponse:(NSURLResponse*)response;
+- (void)client:(EvernoteHTTPClient*)client didFailWithError:(NSError*)error;
+- (void)client:(EvernoteHTTPClient*)client didLoad:(id)result;
+- (void)client:(EvernoteHTTPClient*)client didLoadRawResponse:(NSData*)data;
+- (void)client:(EvernoteHTTPClient*)client didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite;
 @end

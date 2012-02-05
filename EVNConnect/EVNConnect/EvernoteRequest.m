@@ -14,6 +14,22 @@
 #import "DDXML.h"
 
 //-----------------------------------------------------------------------------
+//EDAMNoteStoreClient delegate to set delegate to EvernoteHTTPClient
+//-----------------------------------------------------------------------------
+@interface EDAMNoteStoreClient(SetDelegate)
+- (void) setHTTPClientDelegate:(id<EvernoteHTTPClientDelegate>)delegate;
+@end
+@implementation EDAMNoteStoreClient(SetDelegate)
+/*!
+ * set delegate to http client
+ */
+- (void)setHTTPClientDelegate:(id<EvernoteHTTPClientDelegate>)delegate{
+    EvernoteHTTPClient *client = (EvernoteHTTPClient *)[outProtocol transport];
+    client.delegate = delegate;
+}
+@end
+
+//-----------------------------------------------------------------------------
 //Private Implementations
 //-----------------------------------------------------------------------------
 @interface EvernoteRequest(PrivateImplementation)
@@ -44,6 +60,7 @@
     if(self){
         authToken_ = authToken;
         noteStoreClient_ = client;
+        [noteStoreClient_ setHTTPClientDelegate:self];
         contextDelegate_ = contextDelegate;
         self.delegate = inDelegate;
     }
@@ -434,6 +451,61 @@
     @catch (NSException *exception) {
         NSLog(@"main: Caught %@: %@", [exception name], [exception reason]);
         [contextDelegate_ request:self didFailWithException:exception];
+    }
+}
+
+#pragma mark - EvernoteHTTPClientDelegate
+/*!
+ * client loading start
+ */
+- (void)clientLoading:(EvernoteHTTPClient *)client{
+    if([self.delegate respondsToSelector:@selector(requestLoading:)]){
+        [self.delegate requestLoading:self];
+    }
+}
+
+/*!
+ * did receive first response
+ */
+- (void)client:(EvernoteHTTPClient *)client didReceiveResponse:(NSURLResponse *)response{
+    if([self.delegate respondsToSelector:@selector(request:didReceiveResponse:)]){
+        [self.delegate request:self didReceiveResponse:response];
+    }
+}
+
+/*!
+ * progress
+ */
+- (void)client:(EvernoteHTTPClient *)client didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite{
+    if([self.delegate respondsToSelector:@selector(request:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:)]){
+        [self.delegate request:self didSendBodyData:bytesWritten totalBytesWritten:totalBytesWritten totalBytesExpectedToWrite:totalBytesExpectedToWrite];
+    }
+}
+
+/*!
+ * client did faild with error
+ */
+- (void)client:(EvernoteHTTPClient *)client didFailWithError:(NSError *)error{
+    if([self.delegate respondsToSelector:@selector(request:didFailWithError:)]){
+        [self.delegate request:self didFailWithError:error];
+    }    
+}
+
+/*!
+ * did load
+ */
+- (void)client:(EvernoteHTTPClient *)client didLoad:(id)result{
+    if([self.delegate respondsToSelector:@selector(request:didLoad:)]){
+        [self.delegate request:self didLoad:result];
+    }
+}
+
+/*!
+ * did load raw response
+ */
+- (void)client:(EvernoteHTTPClient *)client didLoadRawResponse:(NSData *)data{
+    if([self.delegate respondsToSelector:@selector(request:didLoadRawResponse:)]){
+        [self.delegate request:self didLoadRawResponse:data];
     }
 }
 @end

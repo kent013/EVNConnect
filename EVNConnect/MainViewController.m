@@ -3,7 +3,7 @@
 //  EVNConnect
 //
 //  Created by Kentaro ISHITOYA on 12/02/02.
-//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Kentaro ISHITOYA. All rights reserved.
 //
 
 #import "MainViewController.h"
@@ -85,44 +85,56 @@
     [evernote_ logout];
 }
 
+#pragma mark - EvernoteRequestDelegate
+-(void)requestLoading:(EvernoteRequest *)request{
+    NSLog(@"start request");
+}
+
+- (void)request:(EvernoteRequest *)request didReceiveResponse:(NSURLResponse *)response{
+    NSLog(@"did received response");
+}
+
+- (void)request:(EvernoteRequest *)client didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite{
+    NSLog(@"progress:%f", (float)totalBytesWritten / (float)totalBytesExpectedToWrite);
+}
+
+- (void)request:(EvernoteRequest *)request didFailWithError:(NSError *)error{
+    NSLog(@"request failed with error:%@", error.description);
+}
+
+- (void)request:(EvernoteRequest *)request didLoad:(id)result{
+    NSLog(@"did request loaded");
+}
+
+- (void)request:(EvernoteRequest *)request didLoadRawResponse:(NSData *)data{
+    NSLog(@"did request loaded(raw)");    
+}
+
+#pragma mark - EvernoteSessionDelegate
+/*!
+ * did login to evernote
+ */
 -(void)evernoteDidLogin{
     [evernote_ saveCredential];
 }
 
+/*!
+ * did logout from evernote
+ */
 - (void)evernoteDidLogout{
     
 }
 
+/*!
+ * attempt to login, but not logined
+ */
 - (void)evernoteDidNotLogin{
     
 }
 
-- (void)didReceiveMemoryWarning
-{
-    // Releases the view if it doesn't have a superview.
-    [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
-}
-
 #pragma mark - View lifecycle
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    // Do any additional setup after loading the view from its nib.
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 

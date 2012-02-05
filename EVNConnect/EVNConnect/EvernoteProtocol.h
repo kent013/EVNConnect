@@ -30,6 +30,8 @@ static NSString *kEvernoteAuthToken = @"evernoteAuthToken";
 static NSString *kEvernoteUserId = @"evernoteUserId";
 static NSString *kEvernoteShardId = @"evernoteShardId";
 
+@class EvernoteRequest;
+
 /*!
  * enum for consumer engine
  */
@@ -45,6 +47,19 @@ typedef enum {
 - (void)evernoteDidLogin;
 - (void)evernoteDidNotLogin;
 - (void)evernoteDidLogout;
+@end
+
+/*!
+ * delegate for evernote request
+ */
+@protocol EvernoteRequestDelegate <NSObject>
+@optional
+- (void)requestLoading:(EvernoteRequest*)request;
+- (void)request:(EvernoteRequest*)request didReceiveResponse:(NSURLResponse*)response;
+- (void)request:(EvernoteRequest*)request didFailWithError:(NSError*)error;
+- (void)request:(EvernoteRequest*)request didLoad:(id)result;
+- (void)request:(EvernoteRequest*)request didLoadRawResponse:(NSData*)data;
+- (void)request:(EvernoteRequest*)client didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite;
 @end
 
 /*!

@@ -10,13 +10,13 @@
 #import <UIKit/UIKit.h>
 #import "UserStore.h"
 #import "NoteStore.h"
+#import "EvernoteProtocol.h"
+#import "EvernoteHTTPClient.h"
 
 @class Evernote;
-
-@protocol EvernoteRequestDelegate;
 @protocol EvernoteContextDelegate;
 
-@interface EvernoteRequest : NSObject {
+@interface EvernoteRequest : NSObject<EvernoteHTTPClientDelegate> {
 	EDAMNoteStoreClient	*noteStoreClient_;
     __strong NSString *authToken_;
     id<EvernoteContextDelegate> contextDelegate_;
@@ -59,15 +59,5 @@
 
 @protocol EvernoteContextDelegate <NSObject>
 - (void)request:(EvernoteRequest *)request didFailWithException:(NSException *)exception;
-@end
-
-@protocol EvernoteRequestDelegate <NSObject>
-@optional
-- (void)requestLoading:(EvernoteRequest*)request;
-- (void)request:(EvernoteRequest*)request didReceiveResponse:(NSURLResponse*)response;
-- (void)request:(EvernoteRequest*)request didFailWithError:(NSError*)error;
-- (void)request:(EvernoteRequest*)request didLoad:(id)result;
-- (void)request:(EvernoteRequest*)request didLoadRawResponse:(NSData*)data;
-
 @end
 
