@@ -122,14 +122,14 @@
  * did logout from evernote
  */
 - (void)evernoteDidLogout{
-    
+    [evernote_ clearCredential];
 }
 
 /*!
  * attempt to login, but not logined
  */
 - (void)evernoteDidNotLogin{
-    
+    [evernote_ clearCredential];
 }
 
 #pragma mark - View lifecycle
