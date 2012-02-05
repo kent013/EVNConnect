@@ -85,11 +85,19 @@ To generate md5 hash, I forget where it comes.
                                andDelegate:self];
     //load creadentials
     [evernote_ loadCredential];
-    //…. snip ….
+
+    //... snip ...
+    //login to evernote using oauth.
+    [evernote_ login];
+    
+    //... snip ...
+    //request
     EvernoteRequest *request = [evernote_ requestWithDelegate:self];
     NSLog(@"%@", [evernote_ notebooks].description);
     EDAMNotebook *notebook = [request notebookNamed:@"test"];
-    //…. snip ….
+
+    //... snip ...
+    //delegates for credential
     #pragma mark - EvernoteSessionDelegate
     -(void)evernoteDidLogin{
         [evernote_ saveCredential];
