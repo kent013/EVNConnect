@@ -42,6 +42,7 @@ Usage
 
 ### 2, Put 3rd party libraries into your project and configure them.
 Libraries are stored in [Libraries](https://github.com/kent013/EVNConnect/tree/master/Libraries)
+
  * Evernote  
 [ARC enable version of evernote api 1.20](http://stackoverflow.com/questions/8684039/evernote-cocoa-sdk-not-compiling-for-ios5). 
 
