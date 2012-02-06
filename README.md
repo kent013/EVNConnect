@@ -1,5 +1,7 @@
 Evernote API wrapper: EVNConnect
 ==================================
+[日本語の説明はこちら](http://d.hatena.ne.jp/kent013/20120206/1328503033)
+
 This library is a wrapper of Evernote API.  
 * ARC enabled project.  
 * I did not implemented all of evernote API, only what I needed.
