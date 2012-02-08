@@ -13,8 +13,15 @@ Concept
 I don't want to store username and password in our app.  
 (I don't need dialog, supports only oauth using safari for multitasking ios)
 
-### 2, Request delegate  
-I want to know the progress of request, implemented subclass of thrift's THTTPClient, EvernoteHTTPClient to do it. And added EvernoteRequestDelegate.  
+### 2, Synchronous/Asynchronous API wrapper  
+	//synchronous
+    - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
+    //asynchronous
+    - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags resources:(NSArray*)resources andDelegate:(id<EvernoteRequestDelegate>)delegate;
+(I haven't implemented other wrapper methods yet, but asynchronous request implementation is already in [EvernoteNoteStoreClient.h](https://github.com/kent013/EVNConnect/blob/master/EVNConnect/EVNConnect/EvernoteNoteStoreClient.h)) 
+
+### 3, Request delegate  
+I want to know the progress of request, implemented subclass of thrift's THTTPClient, EvernoteHTTPClient to do it. And added EvernoteRequestDelegate. Currently this feature works with asynchronous request only. 
 
     @protocol EvernoteRequestDelegate <NSObject>
     @optional
@@ -29,13 +36,6 @@ I want to know the progress of request, implemented subclass of thrift's THTTPCl
         totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite;
     @end
 
-because of implementation of evernote-api, I could not make request asynchronous.
-
-### 3, Wrapper of NoteStoreClient
-Something like below.
-    EvernoteRequest *request = [evernote_ requestWithDelegate:self];
-    NSArray *notebooks = [evernote_ notebooks];
-    EDAMNotebook *notebook = [request notebookNamed:@"test"];
 
 Usage
 ---------------------------------
@@ -78,6 +78,8 @@ To generate md5 hash, I forget where it comes.
 
 [MainViewController.m](https://github.com/kent013/EVNConnect/blob/master/EVNConnect/MainViewController.m)
 
+#### 3.1, initialize evernote wrapper
+Initialize `Evernote` class as below. Where `EVERNOTE_CONSUMER_KEY` and `EVERNOTE_CONSUMER_SECRET` are provided by evernote. And `callbackScheme` is url scheme which you configured in your project. `useSandBox` is flag to select `http://www.evernote.com` or `http://sandbox.evernote.com` for API endpoint.
     //create instance of evernote
     evernote_ =
         [[Evernote alloc] initWithAuthType:EvernoteAuthTypeOAuthConsumer
@@ -86,21 +88,17 @@ To generate md5 hash, I forget where it comes.
                             callbackScheme:@"evnconnecttest://authorize"
                                 useSandBox:YES
                                andDelegate:self];
-    //load creadentials
+
+#### 3.2, load credential
+If you call `[evernote_ saveCredential]` when previous authentication succeeded, you can load credential via calling `loadCredential` method. If valid credential loaded, you can call noteStore method without switching to safari to authenticate user. 
     [evernote_ loadCredential];
 
-    //... snip ...
-    //login to evernote using oauth.
+#### 3.3, login to evernote
+Now you can call `[evernote_ login]` method to login to Evernote with oauth. When there is no valid authToken saved, this method will switch to safari to authenticate user. 
     [evernote_ login];
-    
-    //... snip ...
-    //request
-    EvernoteRequest *request = [evernote_ requestWithDelegate:self];
-    NSLog(@"%@", [evernote_ notebooks].description);
-    EDAMNotebook *notebook = [request notebookNamed:@"test"];
 
-    //... snip ...
-    //delegates for credential
+#### 3.4, EvernoteSessionDelegate
+You may save credential when user did login, or clear credential when login failed. 
     #pragma mark - EvernoteSessionDelegate
     -(void)evernoteDidLogin{
         [evernote_ saveCredential];
@@ -112,7 +110,26 @@ To generate md5 hash, I forget where it comes.
         [evernote_ clearCredential];
     }
 
-If you want to know information about request, use EvernoteSessionDelegate.
+#### 3.5, send request 
+Now you can request to Evernote API. If you call asynchronous requests, you may implement EvernoteRequestDelegate to handle response from server.
+    //sync request
+    EDAMNotebook *notebook = [evernote_ notebookNamed:@"test"];
+
+    if(notebook == nil){
+        notebook = [evernote_ createNotebookWithTitle:@"test"];
+    }
+    
+    EDAMResource *resource1 = 
+    [evernote_ createResourceFromUIImage:[UIImage imageNamed:@"sample1.jpg"]];
+    
+    //async request
+    [evernote_ createNoteInNotebook:notebook 
+                              title:@"testnote" 
+                            content:@"testnotemogemoge" 
+                               tags:[NSArray arrayWithObjects:@"Photo", @"Bear", nil]
+                          resources:[NSArray arrayWithObject:resource1]
+                        andDelegate:self];
+
 
 License
 -------------------------------------
@@ -133,7 +150,7 @@ Apache thrift is Licensed under Apache License 2.0. You can read full text of th
 OAuthConsumer is Licensed under [MIT License](http://www.opensource.org/licenses/mit-license.php).
 
  * [KissXML](https://github.com/ddeville/KissXML)  
-I could not find out mention of license in there repository. 
+I could not find out mention of license in their repository. 
    
  * [PDKeychainBindingsController](https://github.com/carlbrown/PDKeychainBindingsController)  
 Copyright (C) 2010-2011 by Carl Brown of PDAgent, LLC.  

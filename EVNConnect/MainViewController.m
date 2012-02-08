@@ -50,35 +50,23 @@
 }
 
 - (void) handleTestButtonTapped:(UIButton *)sender{
-    //NSLog(@"%@", [evernote_ notebooks].description);
-    EvernoteRequest *request = [evernote_ requestWithDelegate:self];
-    EDAMNotebook *notebook = [request notebookNamed:@"test"];
+    //sync request
+    EDAMNotebook *notebook = [evernote_ notebookNamed:@"test"];
 
     if(notebook == nil){
-        notebook = [request createNotebookWithTitle:@"test"];
+        notebook = [evernote_ createNotebookWithTitle:@"test"];
     }
     
     EDAMResource *resource1 = 
-    [request createResourceFromUIImage:[UIImage imageNamed:@"sample1.jpg"]];
-    EDAMNote *note = 
-    [request createNoteInNotebook:notebook 
+    [evernote_ createResourceFromUIImage:[UIImage imageNamed:@"sample1.jpg"]];
+    
+    //async request
+    [evernote_ createNoteInNotebook:notebook 
                               title:@"testnote" 
                             content:@"testnotemogemoge" 
                                tags:[NSArray arrayWithObjects:@"Photo", @"Bear", nil]
-                       andResources:[NSArray arrayWithObject:resource1]];
-    
-    EDAMTag *tag = [request tagNamed:@"Cat"];
-    if(tag == nil){
-        tag = [request createTagWithName:@"Cat"];
-    }
-    
-    EDAMResource *resource2 = 
-    [request createResourceFromUIImage:[UIImage imageNamed:@"sample2.jpg"]];
-    [note.tagGuids addObject:tag.guid];
-    [request addResourceToNote:note resource:resource2];
-    [request updateNote:note];
-    
-    //NSLog(@"%@", [evernote_ findNotebooksWithPattern:@"test.*"].description);
+                          resources:[NSArray arrayWithObject:resource1]
+                        andDelegate:self];
 }
 
 - (void) handleLogoutButtonTapped:(UIButton *)sender{

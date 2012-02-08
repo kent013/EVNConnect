@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		791BF34C14E2EBC700697E05 /* EvernoteNoteStoreClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */; };
+		791BF34F14E2ECA300697E05 /* EvernoteBinaryProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */; };
 		793F900714DC15BA00F30885 /* PDKeychainBindings.m in Sources */ = {isa = PBXBuildFile; fileRef = 793F900414DC15BA00F30885 /* PDKeychainBindings.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		793F900814DC15BA00F30885 /* PDKeychainBindingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 793F900614DC15BA00F30885 /* PDKeychainBindingsController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		7940B21F14DC3027004DC895 /* EDAMLimits.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B21614DC3027004DC895 /* EDAMLimits.m */; };
@@ -85,6 +87,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		791BF34814E2EBB600697E05 /* EDAMNoteStoreClient+PrivateMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "EDAMNoteStoreClient+PrivateMethods.h"; sourceTree = "<group>"; };
+		791BF34A14E2EBC700697E05 /* EvernoteNoteStoreClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteNoteStoreClient.h; sourceTree = "<group>"; };
+		791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteNoteStoreClient.m; sourceTree = "<group>"; };
+		791BF34D14E2ECA300697E05 /* EvernoteBinaryProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteBinaryProtocol.h; sourceTree = "<group>"; };
+		791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteBinaryProtocol.m; sourceTree = "<group>"; };
 		793F900314DC15BA00F30885 /* PDKeychainBindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDKeychainBindings.h; sourceTree = "<group>"; };
 		793F900414DC15BA00F30885 /* PDKeychainBindings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDKeychainBindings.m; sourceTree = "<group>"; };
 		793F900514DC15BA00F30885 /* PDKeychainBindingsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDKeychainBindingsController.h; sourceTree = "<group>"; };
@@ -504,6 +511,7 @@
 		79F748A714DAAD3400C7BAD8 /* EVNConnect */ = {
 			isa = PBXGroup;
 			children = (
+				791BF34814E2EBB600697E05 /* EDAMNoteStoreClient+PrivateMethods.h */,
 				79F748B014DAAD3500C7BAD8 /* EVNConnect.h */,
 				79F7493114DB917B00C7BAD8 /* EvernoteProtocol.h */,
 				79F748A814DAAD3500C7BAD8 /* Evernote.h */,
@@ -516,6 +524,10 @@
 				79F7492F14DB916400C7BAD8 /* EvernoteAuthOAuthConsumer.m */,
 				7940B32714DEE3F6004DC895 /* EvernoteHTTPClient.h */,
 				7940B32814DEE3F7004DC895 /* EvernoteHTTPClient.m */,
+				791BF34D14E2ECA300697E05 /* EvernoteBinaryProtocol.h */,
+				791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */,
+				791BF34A14E2EBC700697E05 /* EvernoteNoteStoreClient.h */,
+				791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */,
 			);
 			path = EVNConnect;
 			sourceTree = "<group>";
@@ -740,6 +752,8 @@
 				7940B2CD14DD17A8004DC895 /* DDXMLElement.m in Sources */,
 				7940B2CE14DD17A8004DC895 /* DDXMLNode.m in Sources */,
 				7940B32914DEE3F8004DC895 /* EvernoteHTTPClient.m in Sources */,
+				791BF34C14E2EBC700697E05 /* EvernoteNoteStoreClient.m in Sources */,
+				791BF34F14E2ECA300697E05 /* EvernoteBinaryProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -831,6 +845,8 @@
 		79F7479814DA74A500C7BAD8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EVNConnect/EVNConnect-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
@@ -848,6 +864,8 @@
 		79F7479914DA74A500C7BAD8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "EVNConnect/EVNConnect-Prefix.pch";
 				HEADER_SEARCH_PATHS = (
