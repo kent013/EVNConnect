@@ -15,9 +15,19 @@ I don't want to store username and password in our app.
 
 ### 2, Synchronous/Asynchronous API wrapper  
     //synchronous
-    - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
+    - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook
+                                title:(NSString*)title 
+                              content:(NSString*)content
+                                 tags:(NSArray *)tags
+                         andResources:(NSArray*)resources;
     //asynchronous
-    - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags resources:(NSArray*)resources andDelegate:(id<EvernoteRequestDelegate>)delegate;
+    - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook 
+                                        title:(NSString*)title
+                                      content:(NSString*)content
+                                         tags:(NSArray *)tags
+                                    resources:(NSArray*)resources
+                                  andDelegate:(id<EvernoteRequestDelegate>)delegate;
+                                  
 (I haven't implemented other wrapper methods yet, but asynchronous request implementation is already in [EvernoteNoteStoreClient.h](https://github.com/kent013/EVNConnect/blob/master/EVNConnect/EVNConnect/EvernoteNoteStoreClient.h)) 
 
 ### 3, Request delegate  
