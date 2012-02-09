@@ -62,11 +62,6 @@ typedef enum EvernoteConnectionStatus {
  * flush
  */
 - (void)flush{
-    /*if ([NSThread isMainThread] == NO)
-    {
-        [self performSelectorOnMainThread:@selector(flush) withObject:nil waitUntilDone:YES];
-        return;
-    }*/
     if([self.delegate respondsToSelector:@selector(clientLoading:)]){
         [self.delegate clientLoading:self];
     }

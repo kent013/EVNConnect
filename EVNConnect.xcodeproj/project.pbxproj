@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		791BF34C14E2EBC700697E05 /* EvernoteNoteStoreClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */; };
 		791BF34F14E2ECA300697E05 /* EvernoteBinaryProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */; };
+		791BF36B14E3FC8300697E05 /* EvernoteUserStoreClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 791BF36A14E3FC8200697E05 /* EvernoteUserStoreClient.m */; };
 		793F900714DC15BA00F30885 /* PDKeychainBindings.m in Sources */ = {isa = PBXBuildFile; fileRef = 793F900414DC15BA00F30885 /* PDKeychainBindings.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		793F900814DC15BA00F30885 /* PDKeychainBindingsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 793F900614DC15BA00F30885 /* PDKeychainBindingsController.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		7940B21F14DC3027004DC895 /* EDAMLimits.m in Sources */ = {isa = PBXBuildFile; fileRef = 7940B21614DC3027004DC895 /* EDAMLimits.m */; };
@@ -92,6 +93,9 @@
 		791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteNoteStoreClient.m; sourceTree = "<group>"; };
 		791BF34D14E2ECA300697E05 /* EvernoteBinaryProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteBinaryProtocol.h; sourceTree = "<group>"; };
 		791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteBinaryProtocol.m; sourceTree = "<group>"; };
+		791BF36714E3FC7400697E05 /* EDAMUserStoreClient+PrivateMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "EDAMUserStoreClient+PrivateMethods.h"; sourceTree = "<group>"; };
+		791BF36914E3FC8200697E05 /* EvernoteUserStoreClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EvernoteUserStoreClient.h; sourceTree = "<group>"; };
+		791BF36A14E3FC8200697E05 /* EvernoteUserStoreClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EvernoteUserStoreClient.m; sourceTree = "<group>"; };
 		793F900314DC15BA00F30885 /* PDKeychainBindings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDKeychainBindings.h; sourceTree = "<group>"; };
 		793F900414DC15BA00F30885 /* PDKeychainBindings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PDKeychainBindings.m; sourceTree = "<group>"; };
 		793F900514DC15BA00F30885 /* PDKeychainBindingsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDKeychainBindingsController.h; sourceTree = "<group>"; };
@@ -512,6 +516,7 @@
 			isa = PBXGroup;
 			children = (
 				791BF34814E2EBB600697E05 /* EDAMNoteStoreClient+PrivateMethods.h */,
+				791BF36714E3FC7400697E05 /* EDAMUserStoreClient+PrivateMethods.h */,
 				79F748B014DAAD3500C7BAD8 /* EVNConnect.h */,
 				79F7493114DB917B00C7BAD8 /* EvernoteProtocol.h */,
 				79F748A814DAAD3500C7BAD8 /* Evernote.h */,
@@ -528,6 +533,8 @@
 				791BF34E14E2ECA300697E05 /* EvernoteBinaryProtocol.m */,
 				791BF34A14E2EBC700697E05 /* EvernoteNoteStoreClient.h */,
 				791BF34B14E2EBC700697E05 /* EvernoteNoteStoreClient.m */,
+				791BF36914E3FC8200697E05 /* EvernoteUserStoreClient.h */,
+				791BF36A14E3FC8200697E05 /* EvernoteUserStoreClient.m */,
 			);
 			path = EVNConnect;
 			sourceTree = "<group>";
@@ -754,6 +761,7 @@
 				7940B32914DEE3F8004DC895 /* EvernoteHTTPClient.m in Sources */,
 				791BF34C14E2EBC700697E05 /* EvernoteNoteStoreClient.m in Sources */,
 				791BF34F14E2ECA300697E05 /* EvernoteBinaryProtocol.m in Sources */,
+				791BF36B14E3FC8300697E05 /* EvernoteUserStoreClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

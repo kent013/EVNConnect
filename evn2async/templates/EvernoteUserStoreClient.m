@@ -1,27 +1,27 @@
 //
-//  EvernoteNoteStoreClient.m
-//  Wrapper class of NoteStoreClient
+//  EvernoteUserStoreClient.m
+//  Wrapper class of EDAMUserStoreClient
 //
 //  Created by conv.php on %s.
 //  Copyright (c) 2012 Kentaro ISHITOYA. All rights reserved.
 //
 
-#import "EvernoteNoteStoreClient.h"
+#import "EvernoteUserStoreClient.h"
 #import "EvernoteHTTPClient.h"
-#import "NoteStore.h"
-#import "EDAMNoteStoreClient+PrivateMethods.h"	
+#import "UserStore.h"
+#import "EDAMUserStoreClient+PrivateMethods.h"	
 //-----------------------------------------------------------------------------
 //Private Implementations
 //-----------------------------------------------------------------------------
-@interface EvernoteNoteStoreClient(PrivateImplementation)
+@interface EvernoteUserStoreClient(PrivateImplementation)
 @end
 
-@implementation EvernoteNoteStoreClient(PrivateImplementation)
+@implementation EvernoteUserStoreClient(PrivateImplementation)
 @end
 //-----------------------------------------------------------------------------
 //Public Implementations
 //-----------------------------------------------------------------------------
-@implementation EvernoteNoteStoreClient
+@implementation EvernoteUserStoreClient
 /*!
  * get httpclient
  */
