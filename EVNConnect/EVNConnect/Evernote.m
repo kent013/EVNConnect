@@ -276,6 +276,51 @@
 }
 
 #pragma mark - async methods
+#pragma mark - tags
+
+/*!
+ * tags
+ */
+- (EvernoteRequest *)tagsWithDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+    [request.noteStoreClient listTags:authConsumer_.authToken andDelegate:request];
+    return request;
+}
+
+/*!
+ * create tag with name
+ */
+- (EvernoteRequest *)createTagWithName: (NSString *)name andDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+    
+    EDAMTag *tag = [[EDAMTag alloc] init];
+    tag.name = name;
+    [request.noteStoreClient createTag: authConsumer_.authToken :tag andDelegate:request];
+    return request;    
+}
+
+#pragma mark - notebooks
+/*!
+ * notebooks
+ */
+- (EvernoteRequest *)notebooksWithDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+    [request.noteStoreClient listNotebooks:authConsumer_.authToken andDelegate:request];
+    return request;    
+}
+
+/*!
+ * create notebook with title
+ */
+- (EvernoteRequest *)createNotebookWithTitle:(NSString*)title andDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+    EDAMNotebook *newNotebook = [[EDAMNotebook alloc] init];
+    [newNotebook setName:title];
+    [request.noteStoreClient createNotebook:authConsumer_.authToken :newNotebook andDelegate:request];
+    return request;
+}
+
+#pragma mark - notes
 /*!
  * create note in notebook with resource asynchronously
  * @param target notebook
@@ -290,6 +335,25 @@
     EDAMNote *note = [self createEDAMNoteWithNotebook:notebook title:title content:content tags:tags andResources:resources];
     [request.noteStoreClient createNote:authConsumer_.authToken :note andDelegate:request];
     return request;
+}
+
+/*!
+ * update note
+ */
+- (EvernoteRequest *) updateNote: (EDAMNote *)note andDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+    [request.noteStoreClient updateNote:authConsumer_.authToken :note andDelegate:request];
+    return request;    
+}
+
+/*!
+ * list notes
+ */
+- (EvernoteRequest *)notesForNotebook:(EDAMNotebook *)notebook andDelegate:(id<EvernoteRequestDelegate>)delegate{
+    EvernoteRequest *request = [self requestWithDelegate:delegate];
+	EDAMNoteFilter *filter = [[EDAMNoteFilter alloc] initWithOrder:NoteSortOrder_CREATED ascending:YES words:nil notebookGuid:notebook.guid tagGuids:nil timeZone:nil inactive:NO];	
+    [request.noteStoreClient findNotes:authConsumer_.authToken :filter :0 :[EDAMLimitsConstants EDAM_USER_NOTES_MAX] andDelegate:request];
+	return request;
 }
 
 #pragma mark - sync methods

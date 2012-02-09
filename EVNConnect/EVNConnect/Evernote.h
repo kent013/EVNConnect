@@ -45,8 +45,18 @@
 - (EDAMResource *) createResourceFromImageData:(NSData *)image andMime:(NSString *)mime;
 
 #pragma mark - async methods
+#pragma mark - tags
+- (EvernoteRequest *)tagsWithDelegate:(id<EvernoteRequestDelegate>)delegate;
+- (EvernoteRequest *)createTagWithName: (NSString *)name andDelegate:(id<EvernoteRequestDelegate>)delegate;
+
+#pragma mark - notebooks
+- (EvernoteRequest *)notebooksWithDelegate:(id<EvernoteRequestDelegate>)delegate;
+- (EvernoteRequest *)createNotebookWithTitle:(NSString*)title andDelegate:(id<EvernoteRequestDelegate>)delegate;
+
 #pragma mark - notes
+- (EvernoteRequest *)notesForNotebook:(EDAMNotebook *)notebook andDelegate:(id<EvernoteRequestDelegate>)delegate;
 - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags resources:(NSArray*)resources andDelegate:(id<EvernoteRequestDelegate>)delegate;
+- (EvernoteRequest *) updateNote: (EDAMNote *)note andDelegate:(id<EvernoteRequestDelegate>)delegate;
 
 #pragma mark - sync methods
 #pragma mark - tags
@@ -64,7 +74,6 @@
 - (NSArray *)findNotebooksWithPattern:(NSString *)pattern;
 - (EDAMNotebook*)defaultNotebook;
 - (EDAMNotebook*)createNotebookWithTitle:(NSString*)title;
-- (void) updateNote: (EDAMNote *)note;
 
 #pragma mark - notes
 - (EDAMNoteList*)notesForNotebook:(EDAMNotebook *)notebook;
@@ -72,6 +81,7 @@
 - (EDAMNote*)noteForNoteGUID:(EDAMGuid)guid;
 - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
 - (void)addResourceToNote:(EDAMNote *)note resource:(EDAMResource *)resource;
+- (void) updateNote: (EDAMNote *)note;
 - (void)removeNoteForGUID:(EDAMGuid)guid;
 @end
 
