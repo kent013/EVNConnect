@@ -14,10 +14,20 @@ I don't want to store username and password in our app.
 (I don't need dialog, supports only oauth using safari for multitasking ios)
 
 ### 2, Synchronous/Asynchronous API wrapper  
-	//synchronous
-    - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags andResources:(NSArray*)resources;
+    //synchronous
+    - (EDAMNote*)createNoteInNotebook:(EDAMNotebook *)notebook
+                                title:(NSString*)title 
+                              content:(NSString*)content
+                                 tags:(NSArray *)tags
+                         andResources:(NSArray*)resources;
     //asynchronous
-    - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook title:(NSString*)title content:(NSString*)content tags:(NSArray *)tags resources:(NSArray*)resources andDelegate:(id<EvernoteRequestDelegate>)delegate;
+    - (EvernoteRequest *)createNoteInNotebook:(EDAMNotebook *)notebook 
+                                        title:(NSString*)title
+                                      content:(NSString*)content
+                                         tags:(NSArray *)tags
+                                    resources:(NSArray*)resources
+                                  andDelegate:(id<EvernoteRequestDelegate>)delegate;
+                                  
 (I haven't implemented other wrapper methods yet, but asynchronous request implementation is already in [EvernoteNoteStoreClient.h](https://github.com/kent013/EVNConnect/blob/master/EVNConnect/EVNConnect/EvernoteNoteStoreClient.h)) 
 
 ### 3, Request delegate  
@@ -80,6 +90,7 @@ To generate md5 hash, I forget where it comes.
 
 #### 3.1, initialize evernote wrapper
 Initialize `Evernote` class as below. Where `EVERNOTE_CONSUMER_KEY` and `EVERNOTE_CONSUMER_SECRET` are provided by evernote. And `callbackScheme` is url scheme which you configured in your project. `useSandBox` is flag to select `http://www.evernote.com` or `http://sandbox.evernote.com` for API endpoint.
+
     //create instance of evernote
     evernote_ =
         [[Evernote alloc] initWithAuthType:EvernoteAuthTypeOAuthConsumer
@@ -91,14 +102,17 @@ Initialize `Evernote` class as below. Where `EVERNOTE_CONSUMER_KEY` and `EVERNOT
 
 #### 3.2, load credential
 If you call `[evernote_ saveCredential]` when previous authentication succeeded, you can load credential via calling `loadCredential` method. If valid credential loaded, you can call noteStore method without switching to safari to authenticate user. 
+
     [evernote_ loadCredential];
 
 #### 3.3, login to evernote
 Now you can call `[evernote_ login]` method to login to Evernote with oauth. When there is no valid authToken saved, this method will switch to safari to authenticate user. 
+
     [evernote_ login];
 
 #### 3.4, EvernoteSessionDelegate
 You may save credential when user did login, or clear credential when login failed. 
+
     #pragma mark - EvernoteSessionDelegate
     -(void)evernoteDidLogin{
         [evernote_ saveCredential];
@@ -112,6 +126,7 @@ You may save credential when user did login, or clear credential when login fail
 
 #### 3.5, send request 
 Now you can request to Evernote API. If you call asynchronous requests, you may implement EvernoteRequestDelegate to handle response from server.
+
     //sync request
     EDAMNotebook *notebook = [evernote_ notebookNamed:@"test"];
 
